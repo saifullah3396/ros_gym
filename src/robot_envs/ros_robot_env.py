@@ -1,16 +1,5 @@
 #!/usr/bin/env python
-import os
-import subprocess32 as subprocess
 import rospy
-import time
-import tf
-import mavros
-import rospkg
-import openai_ros.robot_gazebo_env
-from mavros_msgs.msg import State, ParamValue
-from sensor_msgs.msg import NavSatFix
-from mavros_msgs.srv import ParamSet, ParamGet, SetMode, CommandBool, CommandBoolRequest, CommandTOL
-from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion
 from openai_ros import robot_gazebo_env
 
 

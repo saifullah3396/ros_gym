@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
+import numpy as np
 import rospy
 import rospkg
-
 import gym
 from gym.envs.registration import register
 from gym import wrappers
 from gym import envs
 from task_envs import uav_follow_trajectory_task_env
 
-import numpy as np
 
 class MavrosGym:
     def __init__(self):

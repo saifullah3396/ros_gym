@@ -2,13 +2,12 @@
 import os
 import subprocess
 import rospy
-from rospkg import RosPack
 from mavros_msgs.msg import State, EstimatorStatus
 from sensor_msgs.msg import NavSatFix
 from mavros_msgs.srv import SetMode, CommandBool, CommandTOL
 from geometry_msgs.msg import PoseStamped, TwistStamped
-
 import ros_robot_env
+
 
 class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
     """Base class for all px4/mavros based uavs."""

@@ -1,19 +1,11 @@
 #!/usr/bin/env python
-import os
-import subprocess
-import rospy
-from gym import spaces
-
 import numpy as np
+import rospy
 from math import sqrt, pi, cos, acos, log
 from tf.transformations import euler_from_quaternion
-
 from geometry_msgs.msg import Point, Vector3, PoseStamped, TwistStamped, Quaternion
-
 from robot_envs import mavros_uav_robot_env
 from task_envs import uav_base_task_env
-from openai_ros.load_env_params import LoadYamlFileParamsTest
-from openai_ros.roslauncher import ROSLauncher
 
 
 class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, mavros_uav_robot_env.MavrosUAVRobotEnv):

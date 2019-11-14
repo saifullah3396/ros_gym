@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+import numpy as np
 import rospy
 from gym import spaces
-import numpy as np
-from geometry_msgs.msg import Point, Vector3, PoseStamped, TwistStamped, Quaternion
+from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion
 
 class UAVBaseTaskEnv():
     def __init__(self):    
