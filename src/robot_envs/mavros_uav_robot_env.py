@@ -3,6 +3,7 @@ import os
 import subprocess
 import rospy
 from rospkg import RosPack
+from mavros_msgs.msg import State, EstimatorStatus
 from sensor_msgs.msg import NavSatFix
 from mavros_msgs.srv import SetMode, CommandBool, CommandTOL
 from geometry_msgs.msg import PoseStamped, TwistStamped
@@ -24,6 +25,13 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
         # launch connection to gazebo
         super(MavrosUAVRobotEnv, self).__init__()
 
+        # set px4 pose estimator name
+        est = rospy.get_param('mavros_gym/px4-est')
+        if est == 'ekf2':
+            self.pose_est_ = "px4-ekf2" 
+        elif est == 'lpe':
+            self.pose_est_ = "px4-local_position_estimator" 
+
     def _setup_subscribers(self):
         """
         Sets up all the subscribers relating to robot state
@@ -31,6 +39,7 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
         rospy.Subscriber('/mavros/state', State, callback=self._state_cb)
         rospy.Subscriber('/mavros/local_position/pose', PoseStamped, callback=self._pose_cb)
         rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, callback=self._gps_cb)
+        rospy.Subscriber('/mavros/estimator_status', EstimatorStatus, callback=self._est_status_cb)
 
     def _state_cb(self, msg):
         self._state = msg
@@ -163,3 +172,22 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
             wait_time,
             timeout
         )
+
+    def _reset_pose_estimator(self):
+        self.px4_ekf2_path = os.path.join("/home/sai/ros-ws/melodic/lib/px4/" + self.pose_est_)
+        time_stamp = self._est_status.header.stamp
+        ekf2_stop = subprocess.Popen([self.px4_ekf2_path, "stop"])
+        ekf2_stop.wait()
+        ekf2_start = subprocess.Popen([self.px4_ekf2_path, "start"])
+        ekf2_start.wait()
+        while True:
+            # wait for estimator to give a good estimate
+            if self._est_status.header.stamp == time_stamp:
+                continue
+
+            if self._est_status.pred_hor_position_rel and self._est_status.pred_hor_position_abs:
+                # ekf got valid states
+                break
+                
+        #ekf2_status = subprocess.Popen([self.px4_ekf2_path, "status"])
+        #ekf2_status.wait()
