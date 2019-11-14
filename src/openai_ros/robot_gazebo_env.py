@@ -1,12 +1,10 @@
 import rospy
 import gym
 from gym.utils import seeding
-from .gazebo_connection import GazeboConnection
-from .controllers_connection import ControllersConnection
-#https://bitbucket.org/theconstructcore/theconstruct_msgs/src/master/msg/RLExperimentInfo.msg
-from openai_ros.msg import RLExperimentInfo
+from gazebo_connection import GazeboConnection
+from controllers_connection import ControllersConnection
+from mavros_gym_msgs.msg import RLExperimentInfo
 
-# https://github.com/openai/gym/blob/master/gym/core.py
 class RobotGazeboEnv(gym.Env):
 
     def __init__(self, robot_name_space, controllers_list, reset_controls, start_init_physics_parameters=True, reset_world_or_sim="SIMULATION"):

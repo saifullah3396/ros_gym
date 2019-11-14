@@ -10,7 +10,6 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   std_msgs
   rospy
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -47,10 +46,10 @@ catkin_python_setup()
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  RLExpirementInfo.msg
-)
+#add_message_files(
+# FILES
+#  RLExperimentInfo.msg
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -67,10 +66,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+#generate_messages(
+  #DEPENDENCIES
+  #std_msgs  # Or other packages containing msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -104,7 +103,7 @@ add_message_files(
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES mavros_gym
-  CATKIN_DEPENDS message_runtime rospy gazebo_msgs std_msgs geometry_msgs controller_manager_msgs
+  CATKIN_DEPENDS rospy gazebo_msgs std_msgs geometry_msgs controller_manager_msgs
 #  DEPENDS system_lib
 )
 
