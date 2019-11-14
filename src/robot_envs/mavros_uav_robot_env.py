@@ -173,7 +173,7 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
         )
 
     def _reset_pose_estimator(self):
-        self.px4_ekf2_path = os.path.join("/home/sai/ros-ws/melodic/lib/px4/" + self.pose_est_)
+        self.px4_ekf2_path = os.path.join(os.environ['ROS_DEVEL'] + self.pose_est_)
         time_stamp = self._est_status.header.stamp
         ekf2_stop = subprocess.Popen([self.px4_ekf2_path, "stop"])
         ekf2_stop.wait()
