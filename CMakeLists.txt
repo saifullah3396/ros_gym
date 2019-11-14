@@ -8,8 +8,9 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  openai_ros
+  std_msgs
   rospy
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -46,11 +47,10 @@ catkin_python_setup()
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  RLExpirementInfo.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -103,8 +103,8 @@ catkin_python_setup()
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES mavros_gym
-#  CATKIN_DEPENDS openai_ros rospy
+  LIBRARIES mavros_gym
+  CATKIN_DEPENDS message_runtime rospy gazebo_msgs std_msgs geometry_msgs controller_manager_msgs
 #  DEPENDS system_lib
 )
 
