@@ -1,0 +1,6 @@
+<launch>
+    <arg name="gui" default="true"/>
+    <arg name="args" default=""/>
+    <rosparam command="load" file="$(find mavros_gym)/cfg/basic_drone_flight_learning_params.yaml" />
+    <node pkg="mavros_gym" name="mavros_gym_node" type="mavros_gym_node.py" output="screen"/>
+</launch>
