@@ -1,9 +1,16 @@
 #!/usr/bin/env python
+import sys
 import rospy
 from gym_gazebo import robot_gazebo_env
-#from gym_airsim import robot_airsim_env
+from gym_airsim import robot_airsim_env
 
-SIMULATION_ENV = robot_gazebo_env.RobotGazeboEnv
+sim_env = rospy.get_param("/mavros_gym/sim_env")
+if sim_env == 'gazebo':
+    SIMULATION_ENV = robot_gazebo_env.RobotGazeboEnv
+elif sim_env == 'airsim':
+    SIMULATION_ENV = robot_airsim_env.RobotAirSimEnv
+else:
+    raise NotImplementedError('Simulation environment ' + sim_env + ' not supported.')
 
 class ROSRobotEnv(SIMULATION_ENV):
     def __init__(self):
@@ -11,9 +18,15 @@ class ROSRobotEnv(SIMULATION_ENV):
         self.robot_name_space = ''
 
         # launch connection to gazebo
-        super(ROSRobotEnv, self).__init__(
-            robot_name_space=self.robot_name_space,
-            update_physics_params_at_start=True)
+        if sim_env == 'gazebo':
+            super(ROSRobotEnv, self).__init__(
+                robot_name_space=self.robot_name_space,
+                update_physics_params_at_start=True)
+        elif sim_env == 'airsim':
+            super(ROSRobotEnv, self).__init__(
+                robot_name_space=self.robot_name_space)
+
+
         self.sim_handler.unpause()
         self._setup_subscribers()
         self._setup_publishers()
@@ -65,7 +78,7 @@ class ROSRobotEnv(SIMULATION_ENV):
             try:
                 var = rospy.wait_for_message(name, type, timeout)
             except:
-                rospy.logerror('Sensor topic "%s" is not available. Waiting...', name)
+                rospy.logerr('Sensor topic "%s" is not available. Waiting...', name)
         return var
 
     def _check_publisher_ready(self, name, obj, timeout=5.0):
@@ -75,7 +88,7 @@ class ROSRobotEnv(SIMULATION_ENV):
         start_time = rospy.Time.now()
         while obj.get_num_connections() == 0 and not rospy.is_shutdown():
             if (rospy.Time.now() - start_time).to_sec() >= timeout:
-                rospy.logerror('No subscriber found for the publisher %s. Exiting...', name)
+                rospy.logerr('No subscriber found for the publisher %s. Exiting...', name)
     
     def _check_service_ready(self, name, timeout=5.0):
         """
@@ -84,4 +97,4 @@ class ROSRobotEnv(SIMULATION_ENV):
         try:
             rospy.wait_for_service(name, timeout)
         except (rospy.ServiceException, rospy.ROSException), e:
-            rospy.logerror("Service %s unavailable.", name)
+            rospy.logerr("Service %s unavailable.", name)
