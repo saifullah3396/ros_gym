@@ -16,12 +16,23 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, mavros_uav_ro
         uav_base_task_env.UAVBaseTaskEnv.__init__(self)
         mavros_uav_robot_env.MavrosUAVRobotEnv.__init__(self)
 
+    def _pre_reset(self):
+        self.sim_handler.unpause()
+        if self.use_pose_estimator:
+            self._stop_pose_estimator()
+            if (self._set_arming_request(False)):
+                rospy.loginfo("Disarming successful!")
+        else:
+            # disarm before resetting simulation
+            if (self._set_arming_request(False)):
+                rospy.loginfo("Disarming successful!")
+        rospy.sleep(2.0) # wait for robot to fall
+
     def _set_init_pose(self):
         """
         Sets the Robot in its init linear and angular speeds.
         Its preparing it to be reseted in the world.
         """
-        self._pub_cmd_vel(self._init_velocity)
         return True
 
     def _init_env_variables(self):
@@ -30,8 +41,9 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, mavros_uav_ro
         of an episode.
         :return:
         """
-        self.gazebo.unpauseSim()
-        self._reset_pose_estimator()
+        self.sim_handler.unpause()
+        if self.use_pose_estimator:
+            self._reset_pose_estimator()
         self._check_all_systems_ready()
         if (self._set_arming_request(True)):
             rospy.loginfo("Arming successful!")
@@ -40,6 +52,7 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, mavros_uav_ro
 
         # For Info Purposes
         self.cumulated_reward = 0.0
+
         # We get the initial pose to measure the distance from the desired point.
         curr_pose = self.pose
         self.previous_distance_from_des_point = \
