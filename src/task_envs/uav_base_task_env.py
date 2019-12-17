@@ -22,6 +22,7 @@ class UAVBaseTaskEnv():
         self.cumulated_steps = 0.0
         self.vel_msg = TwistStamped()
         self.rate = rospy.Rate(1000.0)
+        self.use_pose_estimator = rospy.get_param("/mavros_gym/use_pose_estimator")
 
     def _setup_workspace(self):
         self.work_space_x_max = rospy.get_param("/mavros_gym/work_space/x_max")
