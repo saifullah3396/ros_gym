@@ -1,4 +1,5 @@
 mavros_gym:
+  sim_env: 'airsim'
   px4-est: 'ekf2'
   use_pose_estimator: True
   environment_name: 'uav-follow-trajectory-env-v0'
