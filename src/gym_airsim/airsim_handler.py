@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 
+import rospy
 import airsim
 from simulation_handler import SimulationHandler
 
 class AirsimHandler(SimulationHandler):
     
     def __init__(self):
-        pass
+        SimulationHandler.__init__(self)
 
     def setup(self):
         """
         Performs initial simulation setup
         """
         self.client = airsim.MultirotorClient()
-        self.client.confirmConnection()
+        try:
+            self.client.confirmConnection()
+        except Exception as e:
+            rospy.logfatal("Failed to connect to airsim client.")
+            exit(1)
         self.client.enableApiControl(True)
         self.client.armDisarm(False)
         
