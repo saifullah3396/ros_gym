@@ -13,15 +13,12 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
     """Base class for all px4/mavros based uavs."""
 
     def __init__(self):
-        rospy.loginfo('Setting up gazebo environment: MavrosUAVRobotEnv.')
-        
-        # list of controllers
-        self.controllers_list = []
+        rospy.loginfo('Setting up simulator environment: MavrosUAVRobotEnv.')
         
         # robot namespace
         self.robot_name_space = ''
 
-        # launch connection to gazebo
+        # launch connection to simulator
         super(MavrosUAVRobotEnv, self).__init__()
 
         # set px4 pose estimator name
@@ -30,6 +27,7 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
             self.pose_est_ = "px4-ekf2" 
         elif est == 'lpe':
             self.pose_est_ = "px4-local_position_estimator" 
+        self.px4_ekf2_path = os.path.join(os.environ['ROS_DEVEL'] + '/lib/px4/' + self.pose_est_)
 
     def _setup_subscribers(self):
         """
@@ -72,6 +70,7 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
         self._pose = self._check_subscriber_ready('/mavros/local_position/pose', PoseStamped)
         self._gps = self._check_subscriber_ready('/mavros/global_position/raw/fix', NavSatFix)
         self._est_status = self._check_subscriber_ready('/mavros/estimator_status', EstimatorStatus)
+        self.last_estimator_ts = self._est_status.header.stamp
 
     def _check_all_publishers_ready(self):
         """
@@ -114,7 +113,7 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
                     rospy.loginfo('Service %s request successful!', name)
                     while not cond() and not rospy.is_shutdown(): # wait for updated state
                         if (rospy.Time.now() - start_time).to_sec() >= timeout:
-                            rospy.logfatal('Call to service %s successful but not response...', name)
+                            rospy.logerror('Call to service %s successful but not response...', name)
                             return False
                     return True
                 else:
@@ -171,22 +170,28 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
             wait_time,
             timeout
         )
-
-    def _reset_pose_estimator(self):
-        self.px4_ekf2_path = os.path.join(os.environ['ROS_DEVEL'] + self.pose_est_)
-        time_stamp = self._est_status.header.stamp
+    
+    def _stop_pose_estimator(self):
         ekf2_stop = subprocess.Popen([self.px4_ekf2_path, "stop"])
         ekf2_stop.wait()
+
+    def _start_pose_estimator(self):
         ekf2_start = subprocess.Popen([self.px4_ekf2_path, "start"])
         ekf2_start.wait()
-        while True:
-            # wait for estimator to give a good estimate
-            if self._est_status.header.stamp == time_stamp:
-                continue
 
-            if self._est_status.pred_hor_position_rel and self._est_status.pred_hor_position_abs:
-                # ekf got valid states
+    def _check_estimator_status(self):
+        while self._est_status.header.stamp == self.last_estimator_ts:
+            pass
+        status = self._est_status.pos_horiz_rel_status_flag and self._est_status.pos_horiz_abs_status_flag and \
+            self._est_status.pos_horiz_rel_status_flag
+        self.last_estimator_ts = self._est_status.header.stamp
+        return status
+
+    def _reset_pose_estimator(self):        
+        time_stamp = self._est_status.header.stamp
+        self._stop_pose_estimator()
+        self._start_pose_estimator()
+        rospy.loginfo("Waiting for ekf pose estimate to be corrected!")
+        while True:
+            if self._check_estimator_status():
                 break
-                
-        #ekf2_status = subprocess.Popen([self.px4_ekf2_path, "status"])
-        #ekf2_status.wait()
