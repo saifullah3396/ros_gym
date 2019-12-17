@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+import time
 import numpy as np
 import rospy
 import rospkg
@@ -42,21 +44,21 @@ class MavrosGym:
 
     def start_training(self):
         rospy.loginfo("Starting training!")
-        #last_time_steps = np.ndarray(0)
-        #n_eps = rospy.get_param("/mavros_gym/n_eps")
-        #start_time = time.time()
-        #highest_reward = 0
-        observation = self.task_env.reset()
-    
+        n_eps = rospy.get_param("/mavros_gym/n_eps")
+        start_time = time.time()
+        highest_reward = 0
+        loss = 0
+        t = 0
+        observation = self.task_env.reset()  
         # Starts the main training loop: the one about the episodes to do
-        '''for i in range(n_eps):
-        rospy.loginfo("############### START EPISODE=>" + str(x))
-        observation = env.reset()
-        state = ''.join(map(str, observation))
-        rospy.logwarn(state)
-        cumulated_reward = 0
-        done = False
-        for i in range(nsteps):
-        rospy.loginfo("Episode: {0} step: {1}".format(x,i))
-        time.sleep(20)
-        env_to_wrap.close()'''
+        for i_eps in range(n_eps):
+            # Print out which step we're on, useful for debugging.
+            cumulated_reward = 0
+            for t in range(10000):
+                rospy.sleep(0.0005)
+                sys.stdout.write("\rStep %s (%s) @ Episode %s/%s, loss: %s" % (t + 1, 10, i_eps + 1, n_eps, loss))
+                sys.stdout.flush()
+            done = True
+            if done:
+                observation = self.task_env.reset()
+            print("\nEpisode Reward: %s" % cumulated_reward)
