@@ -33,14 +33,6 @@ class AirSimUAVRobotEnv(robot_airsim_env.RobotAirSimEnv):
         airsim_ang_vel = self._multirotor_state.kinematics_estimated.angular_velocity
         return self.airsim_to_ros_twist(airsim_lin_vel, airsim_ang_vel)
 
-    @property
-    def front_camera(self):
-        return self.airsim_image_to_numpy(self.sim_handler.client_front_camera)
-    
-    @property
-    def collision_check(self):
-        return self.sim_handler.client_collision_check
-
     def pub_cmd_vel(self, vel_msg):
         vel_x = vel_msg.twist.linear.x
         vel_y = vel_msg.twist.linear.y
