@@ -22,7 +22,7 @@ class AirsimHandler(SimulationHandler):
         self.client.enableApiControl(True)
         self.client.armDisarm(False)
         
-        super.setup()
+        SimulationHandler.setup()
 
     def reset(self):
         try:
