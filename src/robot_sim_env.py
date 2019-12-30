@@ -67,7 +67,7 @@ class RobotSimEnv(gym.Env):
         reward_msg.episode_reward = reward
         self.reward_pub.publish(reward_msg)
 
-    def _pre_reset():
+    def _pre_reset(self):
         """Performs operations required prior to simulation state reset
         """
         raise NotImplementedError()
@@ -116,3 +116,13 @@ class RobotSimEnv(gym.Env):
         """
         raise NotImplementedError()
 
+class WorldState():
+    def __init__(self):
+        pass
+    @property
+    def front_camera(self):
+        raise NotImplementedError()
+
+    @property
+    def collision_check(self):
+        raise NotImplementedError()
