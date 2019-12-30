@@ -35,15 +35,19 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
         """
         rospy.Subscriber('/mavros/state', State, callback=self._state_cb)
         rospy.Subscriber('/mavros/local_position/pose', PoseStamped, callback=self._pose_cb)
+        rospy.Subscriber('/mavros/local_position/velocity', TwistStamped, callback=self._velocity_cb)
         rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, callback=self._gps_cb)
         rospy.Subscriber('/mavros/estimator_status', EstimatorStatus, callback=self._est_status_cb)
-
+    
     def _state_cb(self, msg):
         self._state = msg
 
     def _pose_cb(self, msg):
         self._pose = msg
-    
+
+    def _velocity_cb(self, msg):
+        self._velocity = msg
+
     def _gps_cb(self, msg):
         self._gps = msg
 
@@ -57,10 +61,15 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
     @property
     def pose(self):
         return self._pose
+    
+    @property
+    def velocity(self):
+        return self._velocity
 
     @property
     def gps(self):
         return self._gps
+    
         
     def _check_all_subscribers_ready(self):
         """
@@ -68,6 +77,7 @@ class MavrosUAVRobotEnv(ros_robot_env.ROSRobotEnv):
         """
         self._state = self._check_subscriber_ready('/mavros/state', State)
         self._pose = self._check_subscriber_ready('/mavros/local_position/pose', PoseStamped)
+        self._velocity = self._check_subscriber_ready('/mavros/local_position/velocity', TwistStamped)
         self._gps = self._check_subscriber_ready('/mavros/global_position/raw/fix', NavSatFix)
         self._est_status = self._check_subscriber_ready('/mavros/estimator_status', EstimatorStatus)
         self.last_estimator_ts = self._est_status.header.stamp
