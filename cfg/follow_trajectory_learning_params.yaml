@@ -1,5 +1,6 @@
 mavros_gym:
   sim_env: 'airsim'
+  use_mavros: False
   px4-est: 'ekf2'
   use_pose_estimator: True
   environment_name: 'uav-follow-trajectory-env-v0'
@@ -22,12 +23,12 @@ mavros_gym:
   lz_vel_range: 6
   rot_vel_range: 6
 
-  linear_forward_speed: 0.5 # Spwwed for ging fowards
-  angular_turn_speed: 0.05 # Lienare speed when turning
+  linear_forward_speed: 0.5 # Speed for going foward
+  angular_turn_speed: 0.05 # Linear speed when turning
   angular_speed: 0.3 # Angular speed when turning Left or Right
 
   init_speed_vector:
-    linear_x: 0.0
+    linear_x: 0.0 
     linear_y: 0.0
     linear_z: 0.0
     angular_x: 0.0
@@ -47,6 +48,18 @@ mavros_gym:
   max_orientation_y: 99999999
   max_orientation_z: 99999999
 
+  max_velocity_vector:
+      linear_x: 30.0
+      linear_y: 30.0
+      linear_z: 30.0
+      angular_x: 30.0
+      angular_y: 30.0
+      angular_z: 30.0
+
+  front_cam_res:
+      width: 320 # same as in Documents/AirSim/settings.json
+      height: 240 # same as in Documents/AirSim/settings.json
+
   max_roll: 1.57 # Max roll after which we end the episode
   max_pitch: 1.57 # Max roll after which we end the episode
   max_yaw: inf # Max yaw, its 4 because its bigger the pi, its a complete turn actually the maximum
@@ -61,10 +74,11 @@ mavros_gym:
     y: 0.0
     z: 0.0
 
+  min_height: 0.1
   desired_point_epsilon: 0.05 # Error acceptable to consider that it has reached the desired point
 
   closer_to_point_reward: 10 # We give points for getting closer to the desired point
   not_ending_point_reward: 1 # Points given if we just dont crash
   end_episode_points: 200 # Points given when ending an episode
-
+  collision_penalty: -1000
 
