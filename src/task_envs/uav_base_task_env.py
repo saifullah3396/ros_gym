@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import rospy
-from gym import spaces
+from gym.spaces import Box, Tuple
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion
 
 class UAVBaseTaskEnv():
@@ -40,28 +40,60 @@ class UAVBaseTaskEnv():
         self.max_qx = rospy.get_param("/mavros_gym/max_orientation_x")
         self.max_qy = rospy.get_param("/mavros_gym/max_orientation_y")
         self.max_qz = rospy.get_param("/mavros_gym/max_orientation_z")
+        
+        # Maximum velocity values
+        self.max_vel_lin_x = rospy.get_param(
+                                    "/mavros_gym/max_velocity_vector/linear_x")
+        self.max_vel_lin_y = rospy.get_param(
+                                    "/mavros_gym/max_velocity_vector/linear_y")
+        self.max_vel_lin_z = rospy.get_param(
+                                    "/mavros_gym/max_velocity_vector/linear_z")
+        self.max_vel_ang_x = rospy.get_param(
+                                    "/mavros_gym/max_velocity_vector/angular_x")
+        self.max_vel_ang_y = rospy.get_param(
+                                    "/mavros_gym/max_velocity_vector/angular_y")
+        self.max_vel_ang_z = rospy.get_param(
+                                    "/mavros_gym/max_velocity_vector/angular_z")
 
-        high = \
-            np.array([
-                self.work_space_x_max, 
-                self.work_space_y_max, 
-                self.work_space_z_max,
-                self.max_qw, 
-                self.max_qx, 
-                self.max_qy, 
-                self.max_qz])
+        #Front camera resolution
+        self.front_cam_h = rospy.get_param("/mavros_gym/front_cam_res/height")
+        self.front_cam_w = rospy.get_param("/mavros_gym/front_cam_res/width")
 
-        low = \
-            np.array([ \
-                self.work_space_x_min,
-                self.work_space_y_min,
-                self.work_space_z_min,
-                -1*self.max_qw,
-                -1*self.max_qx,
-                -1*self.max_qy,
-                -1*self.max_qz])
+        numeric_high = np.array([self.work_space_x_max,
+                            self.work_space_y_max,
+                            self.work_space_z_max,
+                            self.max_qw,
+                            self.max_qx,
+                            self.max_qy,
+                            self.max_qz,
+                            self.max_vel_lin_x,
+                            self.max_vel_lin_y,
+                            self.max_vel_lin_z,
+                            self.max_vel_ang_x,
+                            self.max_vel_ang_y,
+                            self.max_vel_ang_z])
 
-        self.observation_space = spaces.Box(low, high)
+        numeric_low = np.array([self.work_space_x_min,
+                        self.work_space_y_min,
+                        self.work_space_z_min,
+                        -1*self.max_qw,
+                        -1*self.max_qx,
+                        -1*self.max_qy,
+                        -1*self.max_qz,
+                        -1*self.max_vel_lin_x,
+                        -1*self.max_vel_lin_y,
+                        -1*self.max_vel_lin_z,
+                        -1*self.max_vel_ang_x,
+                        -1*self.max_vel_ang_y,
+                        -1*self.max_vel_ang_z])
+
+        self.numeric_obs_space = Box(numeric_low, numeric_high, 
+                                    dtype=np.float32)
+        self.image_obs_space = Box(low=0, high=255, 
+                                shape=(self.front_cam_h,self.front_cam_w, 3),
+                                dtype=np.uint8)
+        self.observation_space = Tuple([self.numeric_obs_space, 
+                                        self.image_obs_space])
 
     def _setup_action_space(self):
         # Generate a continuous action space
@@ -69,24 +101,25 @@ class UAVBaseTaskEnv():
         vv_range = rospy.get_param('/mavros_gym/lz_vel_range')
         rv_range = rospy.get_param('/mavros_gym/rot_vel_range')
         
-        self.action_space = \
-            spaces.Box(
-                low=np.array([-hv_range, -hv_range, -vv_range, -rv_range]), \
-                high=np.array([hv_range, hv_range, vv_range, rv_range]))
+        self.action_low = np.array([-1*hv_range, -1*hv_range, -1*vv_range,
+                                    -1*rv_range])
+        self.action_high = np.array([hv_range, hv_range, vv_range, rv_range])
+        self.action_space=Box(low=self.action_low, high=self.action_high,
+                                    dtype=np.float32)
 
     def _setup_init_velocity(self):
-        self._init_velocity = TwistStamped()
-        self._init_velocity.twist.linear.x = \
+        self.init_velocity = TwistStamped()
+        self.init_velocity.twist.linear.x = \
             rospy.get_param('/mavros_gym/init_speed_vector/linear_x')
-        self._init_velocity.twist.linear.y = \
+        self.init_velocity.twist.linear.y = \
             rospy.get_param('/mavros_gym/init_speed_vector/linear_y')
-        self._init_velocity.twist.linear.z = \
+        self.init_velocity.twist.linear.z = \
             rospy.get_param('/mavros_gym/init_speed_vector/linear_z')
-        self._init_velocity.twist.angular.x = \
+        self.init_velocity.twist.angular.x = \
             rospy.get_param('/mavros_gym/init_speed_vector/angular_x')
-        self._init_velocity.twist.angular.y = \
+        self.init_velocity.twist.angular.y = \
             rospy.get_param('/mavros_gym/init_speed_vector/angular_y')
-        self._init_velocity.twist.angular.z = \
+        self.init_velocity.twist.angular.z = \
             rospy.get_param('/mavros_gym/init_speed_vector/angular_z')
 
     def _setup_desired_pose(self):
@@ -106,3 +139,5 @@ class UAVBaseTaskEnv():
             rospy.get_param("/mavros_gym/not_ending_point_reward")
         self.end_episode_points = \
             rospy.get_param("/mavros_gym/end_episode_points")
+        self.collision_penalty = \
+            rospy.get_param("/mavros_gym/collision_penalty")
