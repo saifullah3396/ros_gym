@@ -1,9 +1,9 @@
 from airsim_handler import AirsimHandler
-from robot_sim_env import RobotSimEnv
+from robot_sim_env import RobotSimEnv, WorldState
 from geometry_msgs.msg import PoseStamped, TwistStamped
 import numpy as np
 
-class RobotAirSimEnv(RobotSimEnv):
+class RobotAirSimEnv(RobotSimEnv, WorldState):
 
     def __init__(self, robot_name_space):
         super(RobotAirSimEnv, self).__init__(robot_name_space, AirsimHandler())
@@ -37,3 +37,11 @@ class RobotAirSimEnv(RobotSimEnv):
         img_rgb = img1d.reshape(airsim_img_response.height, airsim_img_response.width, 4)
         img_rgb = np.flipud(img_rgb)
         return img_rgb
+    
+    @property
+    def front_camera(self):
+        return self.airsim_image_to_numpy(self.sim_handler.client_front_camera)  # from AirSim Handler
+    
+    @property
+    def collision_check(self):
+        return self.sim_handler.client_collision_check # from AirSim Handler
