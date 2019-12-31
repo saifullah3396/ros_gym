@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import rospy
 import airsim, setup_path
 from simulation_handler import SimulationHandler
@@ -18,8 +19,9 @@ class AirsimHandler(SimulationHandler):
         try:
             self._client.confirmConnection()
         except Exception as e:
-            rospy.logfatal("Failed to connect to airsim client.")
-            exit(1)
+            rospy.logfatal("Failed to connect to an airsim client. Please start AirSim to continue...")
+            sys.exit()
+
         self._client.enableApiControl(True)
         self._client.armDisarm(False)
         super(AirsimHandler, self).setup()
