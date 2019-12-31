@@ -7,7 +7,7 @@ from simulation_handler import SimulationHandler
 class AirsimHandler(SimulationHandler):
     
     def __init__(self):
-        SimulationHandler.__init__(self)
+        super(AirsimHandler, self).__init__()
         self._new_state = True
 
     def setup(self):
@@ -22,9 +22,7 @@ class AirsimHandler(SimulationHandler):
             exit(1)
         self._client.enableApiControl(True)
         self._client.armDisarm(False)
-
-        SimulationHandler.setup(self)
-
+        super(AirsimHandler, self).setup()
 
     def reset(self):
         try:

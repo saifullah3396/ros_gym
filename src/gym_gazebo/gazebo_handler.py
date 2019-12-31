@@ -31,7 +31,7 @@ ode_physics_default.max_contacts = 20
 class GazeboHandler(SimulationHandler):
     
     def __init__(self, update_physics_params_at_start=False):
-        SimulationHandler.__init__(self)
+        super(GazeboHandler, self).__init__()
         self.update_physics_params_at_start = update_physics_params_at_start
 
     def setup(self):
@@ -46,7 +46,9 @@ class GazeboHandler(SimulationHandler):
             stype = gazebo_services_dict[name][1]
             self._check_service_ready(sname)
             self.services[name] = rospy.ServiceProxy(sname, stype) 
-        SimulationHandler.setup(self)
+            
+        print("calling simulation handler setup()")
+        super(GazeboHandler, self).setup()
 
     def reset(self):
         try:

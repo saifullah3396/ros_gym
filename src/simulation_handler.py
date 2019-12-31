@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-class SimulationHandler():
+class SimulationHandler(object):
     
     def __init__(self):
         self.setup()
@@ -9,6 +9,7 @@ class SimulationHandler():
         """
         Performs initial simulation setup
         """
+        print("calling simulation handler setup()2")
         self.initialize_physics_params()
         self.pause()
             
