@@ -12,8 +12,8 @@ class RobotGazeboEnv(RobotSimEnv, WorldState):
         
     @property
     def front_camera(self):
-        raise NotImplementedError
+        raise NotImplementedError()
     
     @property
     def collision_check(self):
-        raise NotImplementedError
+        raise NotImplementedError()
