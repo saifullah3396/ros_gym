@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import rospy
 from gym_gazebo import robot_gazebo_env
