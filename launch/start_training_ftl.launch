@@ -2,5 +2,6 @@
     <arg name="gui" default="true"/>
     <arg name="args" default=""/>
     <rosparam command="load" file="$(find mavros_gym)/cfg/follow_trajectory_learning_params.yaml" />
+    <rosparam command="load" file="$(find ddpg_conv_state)/cfg/ddpg_conv_state.yaml" />
     <node pkg="mavros_gym" name="mavros_gym_node" type="mavros_gym_node.py" output="screen"/>
 </launch>
