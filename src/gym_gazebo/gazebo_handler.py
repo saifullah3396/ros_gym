@@ -96,5 +96,5 @@ class GazeboHandler(SimulationHandler):
         """
         try:
             rospy.wait_for_service(name, timeout)
-        except (rospy.ServiceException, rospy.ROSException), e:
+        except (rospy.ServiceException, rospy.ROSException) as e:
             rospy.logerr("Service %s unavailable.", name)

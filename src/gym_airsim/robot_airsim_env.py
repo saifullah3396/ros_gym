@@ -1,7 +1,9 @@
-from airsim_handler import AirsimHandler
+#!/usr/bin/env python3
+
+import numpy as np
+from .airsim_handler import AirsimHandler
 from robot_sim_env import RobotSimEnv, WorldState
 from geometry_msgs.msg import PoseStamped, TwistStamped
-import numpy as np
 
 class RobotAirSimEnv(RobotSimEnv, WorldState):
 

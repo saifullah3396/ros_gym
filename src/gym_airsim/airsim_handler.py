@@ -2,7 +2,7 @@
 
 import sys
 import rospy
-import airsim, setup_path
+import airsim
 from simulation_handler import SimulationHandler
 
 class AirsimHandler(SimulationHandler):

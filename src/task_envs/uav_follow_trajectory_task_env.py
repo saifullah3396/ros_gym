@@ -5,7 +5,7 @@ from math import sqrt, pi, cos, acos, log
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, TwistStamped, Quaternion
 from robot_envs import airsim_uav_robot_env, mavros_uav_robot_env
-import uav_base_task_env
+from .uav_base_task_env import UAVBaseTaskEnv
 
 use_mavros = rospy.get_param("/mavros_gym/use_mavros")
 if use_mavros:
@@ -13,12 +13,12 @@ if use_mavros:
 else:
     CONTROL_METHOD = airsim_uav_robot_env.AirSimUAVRobotEnv
 
-class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHOD):
+class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
     def __init__(self):    
         """
         Make a mavros based drone learn how to follow a trajectory
         """
-        uav_base_task_env.UAVBaseTaskEnv.__init__(self)
+        UAVBaseTaskEnv.__init__(self)
         CONTROL_METHOD.__init__(self)
 
     def _pre_reset(self):
