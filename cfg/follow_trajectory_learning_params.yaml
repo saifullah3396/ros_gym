@@ -36,12 +36,12 @@ mavros_gym:
     angular_z: 0.0
   
   work_space: # 3D cube in which Drone is allowed to move
-    x_max: 13.0
-    x_min: -1.0
-    y_max: 5.0
-    y_min: -1.0
-    z_max: 3.0
-    z_min: -1.0
+    x_max: 100.0
+    x_min: -100.0
+    y_max: 100.0
+    y_min: -100.0
+    z_max: 100.0
+    z_min: -100.0
 
   max_orientation_w: 99999999
   max_orientation_x: 99999999
@@ -65,16 +65,16 @@ mavros_gym:
   max_yaw: inf # Max yaw, its 4 because its bigger the pi, its a complete turn actually the maximum
 
   desired_position:
-    x: 10.0
-    y: 5.0
-    z: 9.0
-  desired_orientation:
-    w: 1.0
     x: 0.0
+    y: -48.0
+    z: -3.0
+  desired_orientation:
+    w: -0.707
+    x: 0.707
     y: 0.0
     z: 0.0
 
-  min_height: 0.1
+  min_height: 0.3
   desired_point_epsilon: 0.05 # Error acceptable to consider that it has reached the desired point
 
   closer_to_point_reward: 10 # We give points for getting closer to the desired point
