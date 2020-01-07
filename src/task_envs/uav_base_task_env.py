@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 import numpy as np
 import rospy
 from gym.spaces import Box, Tuple
@@ -16,13 +17,14 @@ class UAVBaseTaskEnv():
         self._setup_action_space()
         self._setup_init_velocity()
         self._setup_desired_pose()
-        self._setup_rewards
+        self._setup_rewards()
         self.desired_pose_epsilon = rospy.get_param("/mavros_gym/desired_point_epsilon")
         self.geo_distance = rospy.get_param("/mavros_gym/geodesic_distance")
         self.cumulated_steps = 0.0
         self.vel_msg = TwistStamped()
         self.rate = rospy.Rate(1000.0)
         self.use_pose_estimator = rospy.get_param("/mavros_gym/use_pose_estimator")
+        self.min_height = rospy.get_param("mavros_gym/min_height")
 
     def _setup_workspace(self):
         self.work_space_x_max = rospy.get_param("/mavros_gym/work_space/x_max")

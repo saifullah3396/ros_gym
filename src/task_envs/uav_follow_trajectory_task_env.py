@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 import numpy as np
 import rospy
 from math import sqrt, pi, cos, acos, log
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, TwistStamped, Quaternion
 from robot_envs import airsim_uav_robot_env, mavros_uav_robot_env
-from .uav_base_task_env import UAVBaseTaskEnv
+from task_envs import uav_base_task_env
 
 use_mavros = rospy.get_param("/mavros_gym/use_mavros")
 if use_mavros:
@@ -13,12 +14,12 @@ if use_mavros:
 else:
     CONTROL_METHOD = airsim_uav_robot_env.AirSimUAVRobotEnv
 
-class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
+class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHOD):
     def __init__(self):    
         """
         Make a mavros based drone learn how to follow a trajectory
         """
-        UAVBaseTaskEnv.__init__(self)
+        uav_base_task_env.UAVBaseTaskEnv.__init__(self)
         CONTROL_METHOD.__init__(self)
 
     def _pre_reset(self):
@@ -40,7 +41,7 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         """
         
         # We tell drone the linear and angular velocities to set to execute
-        self.pub_cmd_vel(self.init_velocity)
+        #self.pub_cmd_vel(self.init_velocity)
         return True
 
     def _init_env_variables(self):
@@ -99,7 +100,6 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         curr_pose = self.pose
         curr_vel = self.velocity
         curr_front_camera = self.front_camera
-        c = TwistStamped()
         numeric_obs = np.array([curr_pose.pose.position.x,
                         curr_pose.pose.position.y,
                         curr_pose.pose.position.z,
@@ -135,12 +135,12 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
 
         has_collided            = self.collision_check
         is_inside_workspace_now = self.is_inside_workspace(current_position)
-        too_close_to_grnd       = self.too_close_to_ground(current_position[2])
+        too_close_to_grnd       = self.too_close_to_ground(-1*current_position[2])
         drone_flipped           = self.drone_has_flipped(current_orientation)
         has_reached_des_pose    = self.is_in_desired_pose(current_pose,
                                                     self.desired_pose_epsilon)
 
-        rospy.logwarn(">>>>>> DONE RESULTS <<<<<")
+        #rospy.logwarn(">>>>>> DONE RESULTS <<<<<")
 
         if has_collided:
             rospy.logerr("UAV has collided!")
@@ -155,7 +155,7 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
             rospy.logerr("UAV has_flipped!")
 
         if has_reached_des_pose:
-            rospy.logerr("UAV has_reached the desired pose!")
+            rospy.logerr("UAV has_reached the desired pose! Congrats")
 
         # We see if we are outside the Learning Space
         episode_done =  has_collided or\
@@ -197,13 +197,13 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
                 rospy.logwarn("DECREASE IN DISTANCE GOOD")
                 reward = self.closer_to_point_reward
             else:
-                rospy.logerr("ENCREASE IN DISTANCE BAD")
+                rospy.logerr("INCREASE IN DISTANCE BAD")
                 reward = 0
 
         else:
             if self.collision_check:
                 reward = self.collision_penalty
-            elif self.is_in_desired_pose(current_position, epsilon=0.5):
+            elif self.is_in_desired_pose(observations[0][:7], epsilon=0.5):
                 reward = self.end_episode_points
             else:
                 reward = -1*self.end_episode_points
@@ -227,7 +227,7 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         """
 
         is_in_desired_pose = False
-        current_pose = np.array(current_pose)
+        curr_pose = np.asarray(current_pose)
         desired_pose = np.array([self.desired_pose.pose.position.x,\
                         self.desired_pose.pose.position.y,\
                         self.desired_pose.pose.position.z,\
@@ -239,22 +239,24 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         desired_pose_plus = desired_pose + epsilon
         desired_pose_minus= desired_pose - epsilon
 
-        pose_are_close = np.all(current_pose <= desired_pose_plus) and \
-                        np.all(current_pose >  desired_pose_minus)
+        is_in_desired_pose = np.all(curr_pose <= desired_pose_plus) and \
+                        np.all(curr_pose >  desired_pose_minus)
+
+
+        return is_in_desired_pose
 
 
 
-        rospy.logwarn("###### IS DESIRED POS ? ######")
+        # rospy.logwarn("###### IS DESIRED POS ? ######")
 
-        rospy.logwarn("current_pose"+str(current_pose))
+        # rospy.logwarn("current_pose"+str(current_pose))
 
-        rospy.logwarn("desired_pose_plus"+str(desired_pose_plus) +\
-                    ",desired_pose_minus="+str(desired_pose_minus))
+        # rospy.logwarn("desired_pose_plus"+str(desired_pose_plus) +\
+        #             ",desired_pose_minus="+str(desired_pose_minus))
 
-        rospy.logwarn("pose_are_close"+str(pose_are_close))
-        rospy.logwarn("is_in_desired_pose"+str(is_in_desired_pose))
+        # rospy.logwarn("is_in_desired_pose"+str(is_in_desired_pose))
 
-        rospy.logwarn("############")
+        # rospy.logwarn("############")
 
         return is_in_desired_pose
 
@@ -264,15 +266,15 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         """
         is_inside = False
 
-        rospy.logwarn("##### INSIDE WORK SPACE? #######")
-        rospy.logwarn("XYZ current_position"+str(current_position))
-        rospy.logwarn("work_space_x_max"+str(self.work_space_x_max) +
-                    ",work_space_x_min="+str(self.work_space_x_min))
-        rospy.logwarn("work_space_y_max"+str(self.work_space_y_max) +
-                    ",work_space_y_min="+str(self.work_space_y_min))
-        rospy.logwarn("work_space_z_max"+str(self.work_space_z_max) +
-                    ",work_space_z_min="+str(self.work_space_z_min))
-        rospy.logwarn("############")
+        # rospy.logwarn("##### INSIDE WORK SPACE? #######")
+        # rospy.logwarn("XYZ current_position"+str(current_position))
+        # rospy.logwarn("work_space_x_max"+str(self.work_space_x_max) +
+        #             ",work_space_x_min="+str(self.work_space_x_min))
+        # rospy.logwarn("work_space_y_max"+str(self.work_space_y_max) +
+        #             ",work_space_y_min="+str(self.work_space_y_min))
+        # rospy.logwarn("work_space_z_max"+str(self.work_space_z_max) +
+        #             ",work_space_z_min="+str(self.work_space_z_min))
+        # rospy.logwarn("############")
 
         if current_position[0] > self.work_space_x_min and current_position[0] <= self.work_space_x_max:
             if current_position[1] > self.work_space_y_min and current_position[1] <= self.work_space_y_max:
@@ -285,10 +287,10 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         """
         Detects if there is something too close to the drone front
         """
-        rospy.logwarn("##### SONAR TOO CLOSE? #######")
-        rospy.logwarn("Current height"+str(current_position_z) +
-                    ",min_allowed_height="+str(self.min_height))
-        rospy.logwarn("############")
+        # rospy.logwarn("##### SONAR TOO CLOSE? #######")
+        # rospy.logwarn("Current height"+str(current_position_z) +
+        #             ",min_allowed_height="+str(self.min_height))
+        # rospy.logwarn("############")
 
         too_close = current_position_z < self.min_height
         return too_close
@@ -306,13 +308,13 @@ class UAVFollowTrajectoryTaskEnv(UAVBaseTaskEnv, CONTROL_METHOD):
         self.max_roll = rospy.get_param("/mavros_gym/max_roll")
         self.max_pitch = rospy.get_param("/mavros_gym/max_pitch")
 
-        rospy.logwarn("#### HAS FLIPPED? ########")
-        rospy.logwarn("RPY current_orientation"+str(curr_roll, curr_pitch, curr_yaw))
-        rospy.logwarn("max_roll"+str(self.max_roll) +
-                    ",min_roll="+str(-1*self.max_roll))
-        rospy.logwarn("max_pitch"+str(self.max_pitch) +
-                    ",min_pitch="+str(-1*self.max_pitch))
-        rospy.logwarn("############")
+        # rospy.logwarn("#### HAS FLIPPED? ########")
+        # rospy.logwarn("RPY current_orientation"+str(curr_roll, curr_pitch, curr_yaw))
+        # rospy.logwarn("max_roll"+str(self.max_roll) +
+        #             ",min_roll="+str(-1*self.max_roll))
+        # rospy.logwarn("max_pitch"+str(self.max_pitch) +
+        #             ",min_pitch="+str(-1*self.max_pitch))
+        # rospy.logwarn("############")
 
         if curr_roll > -1*self.max_roll and curr_roll <= self.max_roll:
             if curr_pitch > -1*self.max_pitch and curr_pitch <= self.max_pitch:
