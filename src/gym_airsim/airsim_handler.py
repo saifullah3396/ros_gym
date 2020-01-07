@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import rospy
 import airsim
+import setup_path
 from simulation_handler import SimulationHandler
 
 class AirsimHandler(SimulationHandler):
