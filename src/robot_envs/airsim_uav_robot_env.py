@@ -11,7 +11,7 @@ class AirSimUAVRobotEnv(robot_airsim_env.RobotAirSimEnv):
     """Base class for all AirSim based uavs."""
 
     def __init__(self):
-        rospy.loginfo('Setting up simulator environment: MavrosUAVRobotEnv.')
+        rospy.loginfo('Setting up simulator environment: AirSimUAVRobotEnv.')
         # robot namespace
         self.robot_name_space = ''
 
