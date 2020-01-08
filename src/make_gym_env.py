@@ -6,12 +6,12 @@ import rospy
 import os
 
 
-def GymMake(robot_task_env_name, max_steps_per_ep=10000):
+def gym_make(robot_task_env_name, max_steps_per_ep=10000):
     """
     Register the targeted env, and call the gym.make() function
     """
     rospy.logwarn("Env: {} will be imported".format(robot_task_env_name))
-    result = Register_Gym_Env(task_env=robot_task_env_name,\
+    result = register_gym_env(task_env=robot_task_env_name,\
                                 max_episode_steps_per_episode=max_steps_per_ep)
 
     if result:

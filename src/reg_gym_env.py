@@ -3,7 +3,8 @@
 from gym.envs.registration import register
 from gym import envs
 
-def Register_Gym_Env(task_env, max_episode_steps_per_episode=10000):
+
+def register_gym_env(task_env, max_episode_steps_per_episode=10000):
     """
     Register Gym environment. This way we can load them with variable 
     limits. Here is where you have to PLACE YOUR NEW TASK ENV, to be 
