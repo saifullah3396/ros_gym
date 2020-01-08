@@ -3,7 +3,7 @@ mavros_gym:
   use_mavros: False
   px4-est: 'ekf2'
   use_pose_estimator: True
-  environment_name: 'uav-follow-trajectory-env-v0'
+  environment_name: 'uav_follow_trajectory_task_env_v0'
   running_step: 0.04 # amount of time the control will be executed
   pos_step: 0.016     # increment in position for each command
   
