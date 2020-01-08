@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 import gym
 from gym.utils import seeding
