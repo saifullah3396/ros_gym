@@ -59,5 +59,4 @@ class MavrosGym:
 
     def start_training(self):
         rospy.loginfo("Starting training!")
-        start_time = time.time()        
         self.agent.start_training()

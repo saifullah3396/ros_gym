@@ -6,7 +6,6 @@ from gazebo_msgs.msg import ODEPhysics
 from gazebo_msgs.srv import SetPhysicsProperties, SetPhysicsPropertiesRequest, DeleteModel
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Vector3
-
 from simulation_handler import SimulationHandler
 
 gazebo_services_dict = {
@@ -41,7 +40,7 @@ class GazeboHandler(SimulationHandler):
         
         self.services = {}
         # Get simulation handler services
-        for name, service in gazebo_services_dict.items():
+        for name, _ in gazebo_services_dict.items():
             sname = gazebo_services_dict[name][0]
             stype = gazebo_services_dict[name][1]
             self._check_service_ready(sname)
@@ -53,19 +52,19 @@ class GazeboHandler(SimulationHandler):
         try:
             self.services['reset']()
         except rospy.ServiceException as e:
-            rospy.logerr ("Failed to call reset service.")
+            rospy.logerr ('Failed to call reset service with the following error: {}.'.format(e))
 
     def pause(self):
         try:
             self.services['pause']()
         except rospy.ServiceException as e:
-            rospy.logerr('Failed to call pause service.')
+            rospy.logerr('Failed to call pause service with the following error: {}.'.format(e))
         
     def unpause(self):
         try:
             self.services['unpause']()
         except rospy.ServiceException as e:
-            rospy.logerr('Failed to call unpause service.')
+            rospy.logerr('Failed to call unpause service with the following error: {}.'.format(e))
 
     def initialize_physics_params(
         self,
@@ -85,9 +84,9 @@ class GazeboHandler(SimulationHandler):
         set_physics_request.ode_config = ode_physics
 
         try:
-            result = self.services['set_physics'](set_physics_request)
+            self.services['set_physics'](set_physics_request)
         except rospy.ServiceException as e:
-            rospy.logerr('Failed to call set_physics service.')
+            rospy.logerr('Failed to call set_physics service with following error: %s.', e)
 
     def _check_service_ready(self, name, timeout=5.0):
         """
@@ -96,4 +95,4 @@ class GazeboHandler(SimulationHandler):
         try:
             rospy.wait_for_service(name, timeout)
         except (rospy.ServiceException, rospy.ROSException) as e:
-            rospy.logerr("Service %s unavailable.", name)
+            rospy.logerr('Service %s unavailable due to following error: %s', name, e)

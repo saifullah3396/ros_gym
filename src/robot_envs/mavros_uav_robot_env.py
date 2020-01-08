@@ -130,8 +130,8 @@ class MavrosUAVRobotEnv(ROSRobotEnv):
                 else:
                     rospy.logwarn('Call to service %s failed.', name)
                     return False
-            except rospy.ServiceException as exc:
-                rospy.logwarn('Call to service %s failed.', name)
+            except rospy.ServiceException as e:
+                rospy.logwarn('Call to service %s failed with error %s', name, e)
                 return False
         else:
             rospy.loginfo('Service %s condition is already true.', name)
@@ -199,7 +199,6 @@ class MavrosUAVRobotEnv(ROSRobotEnv):
         return status
 
     def _reset_pose_estimator(self):        
-        time_stamp = self._est_status.header.stamp
         self._stop_pose_estimator()
         self._start_pose_estimator()
         rospy.loginfo("Waiting for ekf pose estimate to be corrected!")

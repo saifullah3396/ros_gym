@@ -97,5 +97,5 @@ class ROSRobotEnv(SIMULATION_ENV):
         """
         try:
             rospy.wait_for_service(name, timeout)
-        except (rospy.ServiceException, rospy.ROSException) as e:
+        except (rospy.ServiceException, rospy.ROSException):
             rospy.logerr("Service %s unavailable.", name)
