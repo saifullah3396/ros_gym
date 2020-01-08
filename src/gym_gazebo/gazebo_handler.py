@@ -47,7 +47,6 @@ class GazeboHandler(SimulationHandler):
             self._check_service_ready(sname)
             self.services[name] = rospy.ServiceProxy(sname, stype) 
             
-        print("calling simulation handler setup()")
         super(GazeboHandler, self).setup()
 
     def reset(self):
