@@ -95,28 +95,30 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
         droneEnv API DOCS
         :return:
         """
-        rospy.logdebug("Start Get Observation ==>")
-
         curr_pose = self.pose
         curr_vel = self.velocity
-        curr_front_camera = self.front_camera
-        numeric_obs = np.array([curr_pose.pose.position.x,
-                        curr_pose.pose.position.y,
-                        curr_pose.pose.position.z,
-                        curr_pose.pose.orientation.w,
-                        curr_pose.pose.orientation.x,
-                        curr_pose.pose.orientation.y,
-                        curr_pose.pose.orientation.z,
-                        curr_vel.twist.linear.x,
-                        curr_vel.twist.linear.y,
-                        curr_vel.twist.linear.z,
-                        curr_vel.twist.angular.x,
-                        curr_vel.twist.angular.y,
-                        curr_vel.twist.angular.z])
-        # rospy.logdebug("Observations==>"+str(observations))
-        # rospy.logdebug("END Get Observation ==>")
-        #print("CAMERA TYPE + Shape:",type(curr_front_cam),"  ",curr_front_cam.shape)
-        return [numeric_obs, curr_front_camera]
+        pos_obs_obs = \
+            np.array([
+                curr_pose.pose.position.x,
+                curr_pose.pose.position.y,
+                curr_pose.pose.position.z,
+                curr_pose.pose.orientation.w,
+                curr_pose.pose.orientation.x,
+                curr_pose.pose.orientation.y,
+                curr_pose.pose.orientation.z])
+        vel_obs_space = \
+            np.array([
+                curr_vel.twist.linear.x,
+                curr_vel.twist.linear.y,
+                curr_vel.twist.linear.z,
+                curr_vel.twist.angular.x,
+                curr_vel.twist.angular.y,
+                curr_vel.twist.angular.z])
+        return {
+            "position": pos_obs_obs, 
+            "velocity": vel_obs_space, 
+            "front_cam": self.front_camera
+        }
 
     def _is_done(self, observations):
         """
@@ -129,9 +131,9 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
         """
 
         episode_done = False
-        current_pose = observations[0][:7]
-        current_position = observations[0][:3]
-        current_orientation = observations[0][3:7]
+        current_pose = observations['position']
+        current_position = observations['position'][:3]
+        current_orientation = observations['position'][3:7]
 
         has_collided            = self.collision_check
         is_inside_workspace_now = self.is_inside_workspace(current_position)
@@ -172,13 +174,13 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
     def _compute_reward(self, observations, done):
         
         current_pose = PoseStamped()
-        current_pose.pose.position.x    = observations[0][0]
-        current_pose.pose.position.y    = observations[0][1]
-        current_pose.pose.position.z    = observations[0][2]
-        current_pose.pose.orientation.w = observations[0][3]
-        current_pose.pose.orientation.x = observations[0][4]
-        current_pose.pose.orientation.y = observations[0][5]
-        current_pose.pose.orientation.z = observations[0][6]
+        current_pose.pose.position.x    = observations['position'][0]
+        current_pose.pose.position.y    = observations['position'][1]
+        current_pose.pose.position.z    = observations['position'][2]
+        current_pose.pose.orientation.w = observations['position'][3]
+        current_pose.pose.orientation.x = observations['position'][4]
+        current_pose.pose.orientation.y = observations['position'][5]
+        current_pose.pose.orientation.z = observations['position'][6]
         
         current_position = current_pose.pose.position
         distance_from_des_point = self.get_distance_from_desired_point(current_pose.pose.position)
@@ -203,7 +205,7 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
         else:
             if self.collision_check:
                 reward = self.collision_penalty
-            elif self.is_in_desired_pose(observations[0][:7], epsilon=0.5):
+            elif self.is_in_desired_pose(observations['position'][:7], epsilon=0.5):
                 reward = self.end_episode_points
             else:
                 reward = -1*self.end_episode_points
