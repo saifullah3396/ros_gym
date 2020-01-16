@@ -49,3 +49,9 @@ class AirSimUAVRobotEnv(robot_airsim_env.RobotAirSimEnv):
     
     def _set_land_request(self, land_alt, wait_time=0.05, timeout=5.0):
         return self.sim_handler.client_land
+    
+    def _check_all_systems_ready(self):
+        pass
+    
+    def _reset_pose_estimator(self):        
+        pass
