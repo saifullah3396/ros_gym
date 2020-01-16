@@ -113,7 +113,7 @@ class UAVBaseTaskEnv():
             Box(
                 low=0, 
                 high=255, 
-                shape=(self.front_cam_h, self.front_cam_w, 3),
+                shape=(self.front_cam_h, self.front_cam_w, 4),
                 dtype=np.uint8)
         self.observation_space = \
             Dict({
