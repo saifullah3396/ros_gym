@@ -60,9 +60,9 @@ class AirsimHandler(SimulationHandler):
 
     def client_cmd_vel(self, vx, vy, vz, yaw_rate):
         lin_vel_ind = self._client.moveByVelocityAsync(vx, vy, vz,
-                                                duration=0.1)
+                                                duration=0.005).join()
         yaw_rate_ind = self._client.rotateByYawRateAsync(yaw_rate,
-                                                duration=0.1)
+                                                duration=0.005).join()
         return lin_vel_ind and yaw_rate_ind
 
     @property
@@ -86,8 +86,8 @@ class AirsimHandler(SimulationHandler):
 
     @property
     def client_takeoff(self):
-        return self._client.takeoffAsync(timeout_sec=10)
+        return self._client.takeoffAsync(timeout_sec=5).join()
     
     @property
     def client_land(self):
-        return self._client.landAsync(timeout_sec=10)
+        return self._client.landAsync(timeout_sec=5).join()
