@@ -152,5 +152,4 @@ class AirsimHandler(SimulationHandler):
         """
         Checks if the robot has collided.
         """
-        collision_info = self._client.simGetCollisionInfo()
-        return collision_info.has_collided
+        return self._client.simGetCollisionInfo().has_collided

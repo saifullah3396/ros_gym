@@ -1,99 +1,118 @@
 #!/usr/bin/env python3
+"""
+Defines the UAVFollowTrajectoryTaskEnv class.
+"""
 
+from math import sqrt, acos, log
 import numpy as np
 import rospy
-from math import sqrt, pi, cos, acos, log
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Point, Vector3, PoseStamped, TwistStamped, Quaternion
+from geometry_msgs.msg import PoseStamped, TwistStamped
 from robot_envs import airsim_uav_robot_env, mavros_uav_robot_env
 from task_envs import uav_base_task_env
 
-use_mavros = rospy.get_param("/mavros_gym/use_mavros")
-if use_mavros:
+USE_MAVROS = rospy.get_param("/mavros_gym/use_mavros")
+if USE_MAVROS:
     CONTROL_METHOD = mavros_uav_robot_env.MavrosUAVRobotEnv
 else:
     CONTROL_METHOD = airsim_uav_robot_env.AirSimUAVRobotEnv
 
-class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHOD):
-    def __init__(self):    
-        """
-        Make a mavros based drone learn how to follow a trajectory
-        """
+
+class UAVFollowTrajectoryTaskEnv(
+        uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHOD):
+    """
+    This class defines a task environment for reinforcement learning of UAV
+    robots particularly for following a given input trajectory.
+    """
+    def __init__(self):
         uav_base_task_env.UAVBaseTaskEnv.__init__(self)
         CONTROL_METHOD.__init__(self)
 
+        self.cumulated_reward = 0.0
+        self.cumulated_steps = 0
+
     def _pre_reset(self):
+        """
+        Disarms the robot before resetting the simulation.
+        @todo move this to mavros_uav_robot.
+        """
         self.sim_handler.unpause()
         if self.use_pose_estimator:
             self._stop_pose_estimator()
-            if (self._set_arming_request(False)):
+            if self._set_arming_request(False):
                 rospy.loginfo("Disarming successful!")
         else:
             # disarm before resetting simulation
-            if (self._set_arming_request(False)):
+            if self._set_arming_request(False):
                 rospy.loginfo("Disarming successful!")
-        rospy.sleep(2.0) # wait for robot to fall
+        # wait for robot to fall
+        rospy.sleep(2.0)
 
     def _set_init_pose(self):
         """
-        Sets the Robot in its init linear and angular speeds.
-        Its preparing it to be reseted in the world.
+        Sets the initial state of the robot as required.
         """
-        
-        # We tell drone the linear and angular velocities to set to execute
-        #self.pub_cmd_vel(self.init_velocity)
+
+        # set the linear and angular velocities to execute
+        # self.pub_cmd_vel(self.init_velocity)
         return True
 
     def _init_env_variables(self):
         """
-        Inits variables needed to be initialised each time we reset at the start
-        of an episode.
-        :return:
+        Initializes the environment for a new episode run.
         """
         self.sim_handler.unpause()
         if self.use_pose_estimator:
             self._reset_pose_estimator()
         self._check_all_systems_ready()
-        if (self._set_arming_request(True)):
+        if self._set_arming_request(True):
             rospy.loginfo("Arming successful!")
-        if (self._set_takeoff_request(1)):
+        if self._set_takeoff_request(1):
             rospy.loginfo("Takeoff successful!")
 
-        # For Info Purposes
+        # for information
         self.cumulated_reward = 0.0
+        self.cumulated_steps = 0
 
-        # We get the initial pose to measure the distance from the desired point.
+        # we get the initial pose to measure the distance from
+        # the desired point.
         curr_pose = self.pose
+
+        # pylint: disable=attribute-defined-outside-init
         self.previous_distance_from_des_point = \
             self.get_distance_from_desired_point(curr_pose.pose.position)
 
         self.previous_difference_from_des_orientation = \
-            self.get_difference_from_desired_orientation(curr_pose.pose.orientation)
+            self.get_difference_from_desired_orientation(
+                curr_pose.pose.orientation)
 
     def _set_action(self, action):
         """
-        This set action will Set the linear and angular speed of the drone
-        based on the action number given.
-        :param action: The action integer that set s what movement to do next.
+        Sets the action in the form of linear/angular velocities send to the
+        robot.
+
+        Parameters
+        ----------
+        action: np.array
+            A numpy array of size 4 = [vel_x, vel_y, vel_z, yaw]
         """
         action_vel = TwistStamped()
-        action_vel.twist.linear.x   = action[0]
-        action_vel.twist.linear.y   = action[1]
-        action_vel.twist.linear.z   = action[2]
-        action_vel.twist.angular.x  = 0.0
-        action_vel.twist.angular.y  = 0.0
-        action_vel.twist.angular.z  = action[3]
-        
-        # We tell drone the linear and angular velocities to set to execute
+        action_vel.twist.linear.x = action[0]
+        action_vel.twist.linear.y = action[1]
+        action_vel.twist.linear.z = action[2]
+        action_vel.twist.angular.x = 0.0
+        action_vel.twist.angular.y = 0.0
+        action_vel.twist.angular.z = action[3]
+
+        # set the desired velocity by publishing it to the robot
         self.pub_cmd_vel(action_vel)
-        rospy.logdebug("END Set Action ==>"+str(action))
 
     def _get_obs(self):
         """
-        Here we define what sensor data defines our robots observations
-        To know which Variables we have acces to, we need to read the
-        droneEnv API DOCS
-        :return:
+        Returns the current environment observation. In this environment, a
+        dictionary of position, velocity, and front_cam image is returned. The
+        returned data must conform with env.observation_space. See
+        UAVBaseTaskEnv for more info.
         """
         curr_pose = self.pose
         curr_vel = self.velocity
@@ -115,19 +134,24 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
                 curr_vel.twist.angular.y,
                 curr_vel.twist.angular.z])
         return {
-            "position": pos_obs_obs, 
-            "velocity": vel_obs_space, 
+            "position": pos_obs_obs,
+            "velocity": vel_obs_space,
             "front_cam": self.front_camera
         }
 
     def _is_done(self, observations):
         """
-        The done can be done due to three reasons:
-        1) It collided with anything
-        2) It went outside the workspace
-        3) It detected something with the sonar that is too close
-        4) It flipped due to a crash or something
-        5) It has reached the desired point
+        Returns true if the environment needs to be reset based on the
+        following constraints:
+        1) The robot has collided with the environment.
+        2) The robot has gone outside the workspace
+        3) The robot has detected something too close
+        4) The robot has flipped or crashed.
+        5) The robot has reached its desired destination.
+
+        Parameters
+        ----------
+        observations: Observation of the type defined in observation_space.
         """
 
         episode_done = False
@@ -135,221 +159,181 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
         current_position = observations['position'][:3]
         current_orientation = observations['position'][3:7]
 
-        has_collided            = self.collision_check
-        is_inside_workspace_now = self.is_inside_workspace(current_position)
-        too_close_to_grnd       = self.too_close_to_ground(-1*current_position[2])
-        drone_flipped           = self.drone_has_flipped(current_orientation)
-        has_reached_des_pose    = self.is_in_desired_pose(current_pose,
-                                                    self.desired_pose_epsilon)
+        if self.collision_check:
+            rospy.loginfo(
+                '''Episode finished due to robot collision.''')
+            return True
 
-        #rospy.logwarn(">>>>>> DONE RESULTS <<<<<")
+        if not self.is_inside_workspace(current_position):
+            rospy.loginfo(
+                '''Episode finished since the robot has gone outside
+                the workspace.''')
+            return True
 
-        if has_collided:
-            rospy.logerr("UAV has collided!")
+        if self.too_close_to_ground(-1*current_position[2]):
+            rospy.loginfo(
+                '''Episode finished since the robot has gone too close to
+                the ground.''')
+            return True
 
-        if not is_inside_workspace_now:
-            rospy.logerr("UAV is outside workspace!")
+        if self.drone_has_flipped(current_orientation):
+            rospy.loginfo(
+                'Episode finished since the robot has flipped.')
+            return True
 
-        if too_close_to_grnd:
-            rospy.logerr("UAV is too_close_to_ground!")
-
-        if drone_flipped:
-            rospy.logerr("UAV has_flipped!")
-
-        if has_reached_des_pose:
-            rospy.logerr("UAV has_reached the desired pose! Congrats")
-
-        # We see if we are outside the Learning Space
-        episode_done =  has_collided or\
-                        not(is_inside_workspace_now) or\
-                        too_close_to_grnd or\
-                        drone_flipped or\
-                        has_reached_des_pose
-        
-        if episode_done:
-            rospy.logdebug
+        if self.is_in_desired_pose(current_pose, self.desired_pose_epsilon):
+            rospy.loginfo(
+                '''Episode finished since the robot has successfully reached
+                its destination.''')
+            return True
 
         return episode_done
 
     def _compute_reward(self, observations, done):
-        
+        """
+        Defines the reward function for this environment.
+        """
         current_pose = PoseStamped()
-        current_pose.pose.position.x    = observations['position'][0]
-        current_pose.pose.position.y    = observations['position'][1]
-        current_pose.pose.position.z    = observations['position'][2]
+        current_pose.pose.position.x = observations['position'][0]
+        current_pose.pose.position.y = observations['position'][1]
+        current_pose.pose.position.z = observations['position'][2]
         current_pose.pose.orientation.w = observations['position'][3]
         current_pose.pose.orientation.x = observations['position'][4]
         current_pose.pose.orientation.y = observations['position'][5]
         current_pose.pose.orientation.z = observations['position'][6]
-        
-        current_position = current_pose.pose.position
-        distance_from_des_point = self.get_distance_from_desired_point(current_pose.pose.position)
-        
-        difference_from_des_orientation = self.get_difference_from_desired_orientation(current_pose.pose.orientation)
-        
-        distance_difference = distance_from_des_point - self.previous_distance_from_des_point + \
-                                2*(difference_from_des_orientation - self.previous_difference_from_des_orientation)
+
+        distance_from_des_point = \
+            self.get_distance_from_desired_point(current_pose.pose.position)
+        difference_from_des_orientation = \
+            self.get_difference_from_desired_orientation(
+                current_pose.pose.orientation)
+        distance_difference = \
+            distance_from_des_point - \
+            self.previous_distance_from_des_point + \
+            2 * (
+                difference_from_des_orientation -
+                self.previous_difference_from_des_orientation)
 
         if not done:
-
             if self.collision_check:
                 reward = self.collision_check
-            # If there has been a decrease in the distance to the desired point, we reward it
+            # if there has been a decrease in the distance to the desired
+            # location, we reward it
             if distance_difference < 0.0:
-                rospy.logwarn("DECREASE IN DISTANCE GOOD")
+                rospy.loginfo(
+                    '''Robot rewarded for getting close to the desired
+                    destination.''')
                 reward = self.closer_to_point_reward
             else:
-                rospy.logerr("INCREASE IN DISTANCE BAD")
+                rospy.loginfo(
+                    '''Robot unrewarded for getting away from the desired
+                    destination.''')
                 reward = 0
-
         else:
             if self.collision_check:
                 reward = self.collision_penalty
-            elif self.is_in_desired_pose(observations['position'][:7], epsilon=0.5):
+            elif self.is_in_desired_pose(
+                    observations['position'][:7], tolerance=0.5):
                 reward = self.end_episode_points
             else:
                 reward = -1*self.end_episode_points
 
         self.previous_distance_from_des_point = distance_from_des_point
-        self.previous_difference_from_des_orientation = difference_from_des_orientation
+        self.previous_difference_from_des_orientation = \
+            difference_from_des_orientation
 
-        rospy.logdebug("reward=" + str(reward))
         self.cumulated_reward += reward
-        rospy.logdebug("Cumulated_reward=" + str(self.cumulated_reward))
         self.cumulated_steps += 1
-        rospy.logdebug("Cumulated_steps=" + str(self.cumulated_steps))
+        rospy.logdebug("Reward = {}".format(reward))
+        rospy.logdebug("Cumulated reward = {}".format(self.cumulated_reward))
+        rospy.logdebug("Cumulated steps = {}".format(self.cumulated_steps))
 
         return reward
 
-    # Internal TaskEnv Methods
-    
-    def is_in_desired_pose(self, current_pose, epsilon=0.05):
+    def is_in_desired_pose(self, current_pose, tolerance=0.05):
         """
-        It return True if the current position is similar to the desired poistion
+        Returns true if the current position is close to the desired position
+
+        Parameters
+        ----------
+        current_pose: np.array
+            Current pose of the robot
+        tolerance: Float
+            How far the robot can be from the desired destination pose
         """
 
-        is_in_desired_pose = False
-        curr_pose = np.asarray(current_pose)
-        desired_pose = np.array([self.desired_pose.pose.position.x,\
-                        self.desired_pose.pose.position.y,\
-                        self.desired_pose.pose.position.z,\
-                        self.desired_pose.pose.orientation.w,\
-                        self.desired_pose.pose.orientation.x,\
-                        self.desired_pose.pose.orientation.y,\
-                        self.desired_pose.pose.orientation.z])
-        
-        desired_pose_plus = desired_pose + epsilon
-        desired_pose_minus= desired_pose - epsilon
+        current_pose_array = np.asarray(current_pose)
+        desired_pose = \
+            np.array([
+                self.desired_pose.pose.position.x,
+                self.desired_pose.pose.position.y,
+                self.desired_pose.pose.position.z,
+                self.desired_pose.pose.orientation.w,
+                self.desired_pose.pose.orientation.x,
+                self.desired_pose.pose.orientation.y,
+                self.desired_pose.pose.orientation.z])
 
-        is_in_desired_pose = np.all(curr_pose <= desired_pose_plus) and \
-                        np.all(curr_pose >  desired_pose_minus)
+        desired_pose_plus = desired_pose + tolerance
+        desired_pose_minus = desired_pose - tolerance
 
-
-        return is_in_desired_pose
-
-
-
-        # rospy.logwarn("###### IS DESIRED POS ? ######")
-
-        # rospy.logwarn("current_pose"+str(current_pose))
-
-        # rospy.logwarn("desired_pose_plus"+str(desired_pose_plus) +\
-        #             ",desired_pose_minus="+str(desired_pose_minus))
-
-        # rospy.logwarn("is_in_desired_pose"+str(is_in_desired_pose))
-
-        # rospy.logwarn("############")
-
-        return is_in_desired_pose
+        return \
+            np.all(current_pose_array <= desired_pose_plus) and \
+            np.all(current_pose_array > desired_pose_minus)
 
     def is_inside_workspace(self, current_position):
         """
-        Check if the Drone is inside the Workspace defined
+        Returns true if the robot is inside the workspace bounds.
         """
-        is_inside = False
-
-        # rospy.logwarn("##### INSIDE WORK SPACE? #######")
-        # rospy.logwarn("XYZ current_position"+str(current_position))
-        # rospy.logwarn("work_space_x_max"+str(self.work_space_x_max) +
-        #             ",work_space_x_min="+str(self.work_space_x_min))
-        # rospy.logwarn("work_space_y_max"+str(self.work_space_y_max) +
-        #             ",work_space_y_min="+str(self.work_space_y_min))
-        # rospy.logwarn("work_space_z_max"+str(self.work_space_z_max) +
-        #             ",work_space_z_min="+str(self.work_space_z_min))
-        # rospy.logwarn("############")
-
-        if current_position[0] > self.work_space_x_min and current_position[0] <= self.work_space_x_max:
-            if current_position[1] > self.work_space_y_min and current_position[1] <= self.work_space_y_max:
-                if current_position[2] > self.work_space_z_min and current_position[2] <= self.work_space_z_max:
-                    is_inside = True
-
-        return is_inside
+        return all(
+            [
+                self.work_space_x_min <= current_position[0] <=
+                self.work_space_x_max,
+                self.work_space_y_min <= current_position[1] <=
+                self.work_space_y_max,
+                self.work_space_z_min <= current_position[2] <=
+                self.work_space_z_max,
+            ]
+        )
 
     def too_close_to_ground(self, current_position_z):
         """
-        Detects if there is something too close to the drone front
+        Returns true if the robot is too close to the ground.
         """
-        # rospy.logwarn("##### SONAR TOO CLOSE? #######")
-        # rospy.logwarn("Current height"+str(current_position_z) +
-        #             ",min_allowed_height="+str(self.min_height))
-        # rospy.logwarn("############")
-
-        too_close = current_position_z < self.min_height
-        return too_close
+        return current_position_z < self.min_height
 
     def drone_has_flipped(self, current_orientation):
         """
-        Based on the orientation RPY given states if the drone has flipped
+        Returns true if the robot has flipped.
         """
-        has_flipped = True
-
-        curr_roll, curr_pitch, curr_yaw = euler_from_quaternion([current_orientation[1],\
-                                                                current_orientation[2],\
-                                                                current_orientation[3],\
-                                                                current_orientation[0]])
+        curr_roll, curr_pitch, curr_yaw = \
+            euler_from_quaternion([
+                current_orientation[1],
+                current_orientation[2],
+                current_orientation[3],
+                current_orientation[0]])
         self.max_roll = rospy.get_param("/mavros_gym/max_roll")
         self.max_pitch = rospy.get_param("/mavros_gym/max_pitch")
 
-        # rospy.logwarn("#### HAS FLIPPED? ########")
-        # rospy.logwarn("RPY current_orientation"+str(curr_roll, curr_pitch, curr_yaw))
-        # rospy.logwarn("max_roll"+str(self.max_roll) +
-        #             ",min_roll="+str(-1*self.max_roll))
-        # rospy.logwarn("max_pitch"+str(self.max_pitch) +
-        #             ",min_pitch="+str(-1*self.max_pitch))
-        # rospy.logwarn("############")
-
-        if curr_roll > -1*self.max_roll and curr_roll <= self.max_roll:
-            if curr_pitch > -1*self.max_pitch and curr_pitch <= self.max_pitch:
-                has_flipped = False
-
-        return has_flipped
+        return not all(
+            [
+                -1*self.max_roll <= curr_roll <= self.max_roll,
+                -1*self.max_pitch <= curr_pitch <= self.max_pitch
+            ]
 
     def get_distance_from_desired_point(self, current_position):
         """
-        Calculates the distance from the current position to the desired point
-        :param start_point:
-        :return:
+        Returns the distance between the current position and desired
+        position
         """
-        curr_position = np.array([current_position.x, current_position.y, current_position.z])
-        des_position = np.array([self.desired_pose.pose.position.x,\
-                                self.desired_pose.pose.position.y,\
-                                self.desired_pose.pose.position.z])
-        distance = self.get_distance_between_points(curr_position, des_position)
-
-        return distance
-
-    def get_distance_between_points(self, p_start, p_end):
-        """
-        Given a Vector3 Object, get distance from current position
-        :param p_end:
-        :return:
-        """
-        a = np.array(p_start)
-        b = np.array(p_end)
-
-        distance = np.linalg.norm(a - b)
-
-        return distance
+        curr_position = \
+            np.array([
+                current_position.x, current_position.y, current_position.z])
+        des_position = \
+            np.array([
+                self.desired_pose.pose.position.x,
+                self.desired_pose.pose.position.y,
+                self.desired_pose.pose.position.z])
+        return np.linalg.norm(curr_position - des_position)
 
     def get_difference_from_desired_orientation(self, current_orientation):
         """
@@ -365,7 +349,7 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
         difference = self.get_difference_between_orientations(curr_orientation, des_orientation)
 
         return difference
-    
+
     def get_difference_between_orientations(self, ostart, o_end):
         """
         Given an orientation Object, get difference from current orientation
@@ -379,10 +363,10 @@ class UAVFollowTrajectoryTaskEnv(uav_base_task_env.UAVBaseTaskEnv, CONTROL_METHO
             else:
                 rospy.logerr("can not compute the orientation difference of a quaternion with 0 norm")
                 return float('NaN')
-        
+
             o_product = ostart_conj * o_end
             o_product_vector = o_product[1:4]
-        
+
             v_product_norm = np.linalg.norm(o_product_vector)
             o_product_norm = sqrt(np.dot(o_product, o_product))
 
