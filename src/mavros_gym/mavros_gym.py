@@ -63,7 +63,7 @@ class MavrosGym:
         self.task_env = self.register_env(env_name, max_episode_steps)
 
         self.agent = \
-            AgentBase.get_agent(rospy.get_param('~agent'), env=task_env)
+            AgentBase.get_agent(rospy.get_param('~agent'), env=self.task_env)
         rospy.loginfo('Using agent of type: {}'.format(self.agent.name))
 
         # Set the logging system
