@@ -40,4 +40,3 @@ class SimulationHandler(object):
         """
         Might be implemented to update physics parameters at startup
         """
-        pass
