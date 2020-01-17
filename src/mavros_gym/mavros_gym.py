@@ -10,7 +10,7 @@ from gym import wrappers
 from gym import register
 from gym import envs
 from rl_agents.common.agent_base import AgentBase
-from task_envs.task_env_map import task_env_map
+from task_envs.TASK_ENV_MAP import TASK_ENV_MAP
 
 
 class MavrosGym:
@@ -32,8 +32,8 @@ class MavrosGym:
         """
 
         name = task_env.replace("_", "-")
-        if task_env_map[task_env] is not None:
-            env_file = 'task_envs.' + task_env + ":" + task_env_map[task_env]
+        if TASK_ENV_MAP[task_env] is not None:
+            env_file = 'task_envs.' + task_env + ":" + TASK_ENV_MAP[task_env]
             register(
                 id=name,
                 entry_point=env_file,
@@ -46,7 +46,7 @@ class MavrosGym:
                 'from task_envs.' +
                 task_env +
                 ' import ' +
-                task_env_map[task_env])
+                TASK_ENV_MAP[task_env])
 
         # Check that it was really registered
         supported_gym_envs = [env_spec.id for env_spec in envs.registry.all()]
