@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
+"""
+Defines the SimulationHandler class.
+"""
+
 
 class SimulationHandler(object):
-    
+    """
+    Base class for implementing interaction with a simulator.
+    """
     def __init__(self):
         self.setup()
 
@@ -11,7 +17,7 @@ class SimulationHandler(object):
         """
         self.initialize_physics_params()
         self.pause()
-            
+
     def reset(self):
         """
         Resets the simulation to its initial state
@@ -23,7 +29,7 @@ class SimulationHandler(object):
         Pauses the simulation
         """
         raise NotImplementedError()
-        
+
     def unpause(self):
         """
         Unpauses the simulation
