@@ -8,7 +8,8 @@ from gym_airsim import robot_airsim_env
 
 class AirSimUAVRobotEnv(robot_airsim_env.RobotAirSimEnv):
     """
-    Base class for all AirSim based uavs.
+    Base class for all AirSim based uav robots. All common functionality
+    between UAVs that also use airsim is defined here.
     """
     def __init__(self):
         rospy.loginfo('Setting up simulator environment: AirSimUAVRobotEnv.')
