@@ -1,17 +1,37 @@
 #!/usr/bin/env python3
+"""
+Defines the RobotAirSimEnv class.
+"""
 
 import numpy as np
-from .airsim_handler import AirsimHandler
-from robot_sim_env import RobotSimEnv, WorldState
 from geometry_msgs.msg import PoseStamped, TwistStamped
+from robot_sim_env import RobotSimEnv, WorldState
+from .airsim_handler import AirsimHandler
+
 
 class RobotAirSimEnv(RobotSimEnv, WorldState):
-
+    """
+    The base class for any kind of robot that uses the airsim client.
+    All functionality that is provided by airsim and is common between any
+    type of robot is defined here.
+    """
     def __init__(self):
         super(RobotAirSimEnv, self).__init__(AirsimHandler())
 
     @staticmethod
     def airsim_to_ros_pose(airsim_position, airsim_orientation):
+        """
+        Converts airsim pose to ros pose message.
+
+        Parameters
+        ----------
+        airsim_position:  Airsim Position Type
+        airsim_orientation: Airsim Orientation Type
+
+        Returns
+        -------
+        ros_pose: PoseStamped
+        """
         ros_pose = PoseStamped()
         ros_pose.pose.position.x = airsim_position.x_val
         ros_pose.pose.position.y = airsim_position.y_val
@@ -24,6 +44,18 @@ class RobotAirSimEnv(RobotSimEnv, WorldState):
 
     @staticmethod
     def airsim_to_ros_twist(airsim_lin_vel, airsim_ang_vel):
+        """
+        Converts airsim twist to ros twist message.
+
+        Parameters
+        ----------
+        airsim_position:  Airsim Linear Velocity Type
+        airsim_orientation: Airsim Angular Velocity Type
+
+        Returns
+        -------
+        ros_twist: TwistStamped
+        """
         ros_twist = TwistStamped()
         ros_twist.twist.linear.x = airsim_lin_vel.x_val
         ros_twist.twist.linear.y = airsim_lin_vel.y_val
@@ -35,15 +67,37 @@ class RobotAirSimEnv(RobotSimEnv, WorldState):
 
     @staticmethod
     def airsim_image_to_numpy(airsim_img_response):
-        img1d = np.fromstring(airsim_img_response.image_data_uint8, dtype=np.uint8)
-        img_rgb = img1d.reshape(airsim_img_response.height, airsim_img_response.width, 4)
-        img_rgb = np.flipud(img_rgb)
-        return img_rgb
+        """
+        Converts airsim image to numpy image.
+
+        Parameters
+        ----------
+        airsim_img_response:  Airsim Image Type
+
+        Returns
+        -------
+        img_rgba: np.array
+            An RGBA image as numpy array
+        """
+        img1d = \
+            np.fromstring(
+                airsim_img_response.image_data_uint8, dtype=np.uint8)
+        img_rgba = \
+            img1d.reshape(
+                airsim_img_response.height, airsim_img_response.width, 4)
+        img_rgba = np.flipud(img_rgba)
+        return img_rgba
 
     @property
     def front_camera(self):
-        return self.airsim_image_to_numpy(self.sim_handler.client_front_camera)  # from AirSim Handler
+        """
+        Returns the front camera image.
+        """
+        return self.airsim_image_to_numpy(self.sim_handler.client_front_camera)
 
     @property
     def collision_check(self):
-        return self.sim_handler.client_collision_check # from AirSim Handler
+        """
+        Returns whether collision is true or not.
+        """
+        return self.sim_handler.client_collision_check
