@@ -81,6 +81,23 @@ class AirsimHandler(SimulationHandler):
         """
         return self._client.armDisarm(arm_req)
 
+    def client_takeoff(self, takeoff_z):
+        """
+        Calls the takeoff command on the robot.
+
+        Parameters
+        ----------
+        takeoff_z: Float
+            Height to reach on takeoff
+        """
+        return self._client.moveToZAsync(z=takeoff_z, velocity=0.1).join()
+
+    def client_land(self):
+        """
+        Calls the land command on the robot.
+        """
+        return self._client.landAsync(timeout_sec=5).join()
+
     def client_cmd_vel(self, vel_x, vel_y, vel_z, yaw_rate):
         """
         Sends the commanded velocity to the robot.
@@ -137,17 +154,3 @@ class AirsimHandler(SimulationHandler):
         """
         collision_info = self._client.simGetCollisionInfo()
         return collision_info.has_collided
-
-    @property
-    def client_takeoff(self):
-        """
-        Calls the takeoff command on the robot.
-        """
-        return self._client.takeoffAsync(timeout_sec=5).join()
-
-    @property
-    def client_land(self):
-        """
-        Calls the land command on the robot.
-        """
-        return self._client.landAsync(timeout_sec=5).join()
