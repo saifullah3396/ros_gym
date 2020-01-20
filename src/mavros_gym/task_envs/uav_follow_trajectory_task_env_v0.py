@@ -305,7 +305,7 @@ class UAVFollowTrajectoryTaskEnv(
         """
         Returns true if the robot has flipped.
         """
-        curr_roll, curr_pitch, curr_yaw = \
+        curr_roll, curr_pitch, _ = \
             euler_from_quaternion([
                 current_orientation[1],
                 current_orientation[2],
@@ -318,7 +318,7 @@ class UAVFollowTrajectoryTaskEnv(
             [
                 -1*self.max_roll <= curr_roll <= self.max_roll,
                 -1*self.max_pitch <= curr_pitch <= self.max_pitch
-            ]
+            ])
 
     def get_distance_from_desired_point(self, current_position):
         """
@@ -337,34 +337,44 @@ class UAVFollowTrajectoryTaskEnv(
 
     def get_difference_from_desired_orientation(self, current_orientation):
         """
-        Calculates the distance from the current position to the desired point
-        :param start_point:
-        :return:
+        Calculates the distance from the current orientation and the desired
+        orientation.
         """
-        curr_orientation = np.array([current_orientation.w, current_orientation.x, current_orientation.y, current_orientation.z])
-        des_orientation = np.array([self.desired_pose.pose.orientation.w,\
-                                self.desired_pose.pose.orientation.x,\
-                                self.desired_pose.pose.orientation.y,\
-                                self.desired_pose.pose.orientation.z])
-        difference = self.get_difference_between_orientations(curr_orientation, des_orientation)
-
+        curr_orientation = \
+            np.array([
+                current_orientation.w,
+                current_orientation.x,
+                current_orientation.y,
+                current_orientation.z])
+        des_orientation = \
+            np.array([
+                self.desired_pose.pose.orientation.w,
+                self.desired_pose.pose.orientation.x,
+                self.desired_pose.pose.orientation.y,
+                self.desired_pose.pose.orientation.z])
+        difference = \
+            self.get_difference_between_orientations(
+                curr_orientation, des_orientation)
         return difference
 
-    def get_difference_between_orientations(self, ostart, o_end):
+    def get_difference_between_orientations(self, o_start, o_end):
         """
-        Given an orientation Object, get difference from current orientation
-        :param p_end:
-        :return:
+        Returns the difference between two orientations.
         """
 
-        if self.geo_distance == True:   #<-- Geodesic distance
-            if np.dot(ostart, ostart) > 0:
-                ostart_conj = np.array((ostart[0], -1*ostart[1:4])) / np.dot(ostart, ostart)
+        if self.geo_distance is True:
+            # geodesic distance
+            if np.dot(o_start, o_start) > 0:
+                o_start_conj = \
+                    np.array((o_start[0], -1 * o_start[1:4])) / \
+                    np.dot(o_start, o_start)
             else:
-                rospy.logerr("can not compute the orientation difference of a quaternion with 0 norm")
+                rospy.logerr(
+                    """can not compute the orientation difference of a
+                    quaternion with 0 norm""")
                 return float('NaN')
 
-            o_product = ostart_conj * o_end
+            o_product = o_start_conj * o_end
             o_product_vector = o_product[1:4]
 
             v_product_norm = np.linalg.norm(o_product_vector)
@@ -373,22 +383,27 @@ class UAVFollowTrajectoryTaskEnv(
             tolerance = 1e-17
             if o_product_norm < tolerance:
                 # 0 quaternion - undefined
-                o_diff = np.array([-float('inf'), float('nan')*o_product_vector])
+                o_diff = \
+                    np.array([-float('inf'), float('nan')*o_product_vector])
             if v_product_norm < tolerance:
                 # real quaternions - no imaginary part
-                o_diff = np.array([log(o_product_norm),0,0,0])
+                o_diff = np.array([log(o_product_norm), 0, 0, 0])
             vec = o_product_vector / v_product_norm
-            o_diff = np.array(log(o_product_norm), acos(o_product[0]/o_product_norm)*vec)
+            o_diff = \
+                np.array(
+                    log(o_product_norm),
+                    acos(o_product[0] / o_product_norm)*vec)
 
             difference = sqrt(np.dot(o_diff, o_diff))
             return difference
 
-        else: #<-- Absolute distance
-            ostart_minus_o_end = ostart - o_end
-            ostart_plus_o_end  = ostart + o_end
-            d_minus = sqrt(np.dot(ostart_minus_o_end, ostart_minus_o_end))
-            d_plus  = sqrt(np.dot(ostart_plus_o_end, ostart_plus_o_end))
-            if (d_minus < d_plus):
+        else:
+            # absolute distance
+            o_start_minus_o_end = o_start - o_end
+            o_start_plus_o_end = o_start + o_end
+            d_minus = sqrt(np.dot(o_start_minus_o_end, o_start_minus_o_end))
+            d_plus = sqrt(np.dot(o_start_plus_o_end, o_start_plus_o_end))
+            if d_minus < d_plus:
                 return d_minus
             else:
                 return d_plus
