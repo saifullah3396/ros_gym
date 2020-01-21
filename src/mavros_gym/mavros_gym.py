@@ -10,7 +10,7 @@ from gym import wrappers
 from gym import register
 from gym import envs
 from rl_agents.common.agent_base import AgentBase
-from task_envs.TASK_ENV_MAP import TASK_ENV_MAP
+from task_envs.task_env_map import TASK_ENV_MAP
 
 
 class MavrosGym:
