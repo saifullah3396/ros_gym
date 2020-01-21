@@ -6,7 +6,8 @@ Defines the MavrosUAVRobotEnv class.
 import os
 import subprocess
 import rospy
-from mavros_msgs.msg import State, EstimatorStatus, NavSatFix
+from mavros_msgs.msg import State, EstimatorStatus
+from sensor_msgs.msg import NavSatFix
 from mavros_msgs.srv import SetMode, CommandBool, CommandTOL
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from .ros_robot_env import ROSRobotEnv
