@@ -93,7 +93,7 @@ class AirsimHandler(SimulationHandler):
         """
         # airsim uses NED frame but we use xyz frame so invert z
         return self._client.moveToZAsync(
-            z=-takeoff_z, velocity=1.0, timeout_sec=5).join()
+            z=-takeoff_z, velocity=1.0, timeout_sec=2.0).join()
 
     def client_land(self):
         """
