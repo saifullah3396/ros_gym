@@ -136,7 +136,8 @@ class UAVFollowTrajectoryTaskEnv(
         return {
             "position": pos_obs_obs,
             "velocity": vel_obs_space,
-            "front_cam": self.camera_depth(camera_index="0")
+            "front_cam": self.camera(camera_index="0"),
+            "front_cam_depth": self.camera_depth(camera_index="0")
         }
 
     def _is_done(self, observations):
