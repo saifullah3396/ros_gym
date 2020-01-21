@@ -92,7 +92,8 @@ class AirsimHandler(SimulationHandler):
             Height to reach on takeoff
         """
         # airsim uses NED frame but we use xyz frame so invert z
-        return self._client.moveToZAsync(z=-takeoff_z, velocity=0.5).join()
+        return self._client.moveToZAsync(
+            z=-takeoff_z, velocity=1.0, timeout_sec=5).join()
 
     def client_land(self):
         """

@@ -183,8 +183,8 @@ class MavrosUAVRobotEnv(ROSRobotEnv):
                     while not cond() and not rospy.is_shutdown():
                         if (rospy.Time.now() - start_time).to_sec() >= timeout:
                             rospy.logerr(
-                                ''''Call to service {} successful but not
-                                response...'''.format(name))
+                                'Call to service {} successful but no \
+                                response...'.format(name))
                             return False
                     return True
                 else:
