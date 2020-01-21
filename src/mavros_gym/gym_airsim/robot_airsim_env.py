@@ -66,13 +66,13 @@ class RobotAirSimEnv(RobotSimEnv, WorldState):
         return ros_twist
 
     @staticmethod
-    def airsim_image_to_numpy(airsim_img_response):
+    def airsim_image_to_numpy(airsim_img):
         """
         Converts airsim image to numpy image.
 
         Parameters
         ----------
-        airsim_img_response:  Airsim Image Type
+        airsim_img:  Airsim Image Type
 
         Returns
         -------
@@ -81,35 +81,31 @@ class RobotAirSimEnv(RobotSimEnv, WorldState):
         """
         img1d = \
             np.fromstring(
-                airsim_img_response.image_data_uint8, dtype=np.uint8)
+                airsim_img.image_data_uint8, dtype=np.uint8)
         img_rgba = \
             img1d.reshape(
-                airsim_img_response.height, airsim_img_response.width, 4)
+                airsim_img.height, airsim_img.width, 4)
         img_rgba = np.flipud(img_rgba)
         return img_rgba
 
     @staticmethod
-    def airsim_depth_image_to_numpy(airsim_img_response):
+    def airsim_depth_image_to_numpy(airsim_img):
         """
         Converts airsim image to numpy image.
 
         Parameters
         ----------
-        airsim_img_response:  Airsim Image Type
+        airsim_img:  Airsim Image Type
 
         Returns
         -------
-        img_rgba: np.array
-            An RGB-D image as numpy array
+        img_depth: np.array
+            Image depth as numpy array
         """
-        img1d = \
-            np.fromstring(
-                airsim_img_response.image_data_uint8, dtype=np.uint8)
-        img_rgba = \
-            img1d.reshape(
-                airsim_img_response.height, airsim_img_response.width, 4)
-        img_rgba = np.flipud(img_rgba)
-        return img_rgba
+        img_depth = \
+            np.array(airsim_img.image_data_float, dtype=np.float32)
+        img_depth = img_depth.reshape(airsim_img.height, airsim_img.width)
+        return img_depth
 
     def camera(self, camera_index):
         """
@@ -120,7 +116,7 @@ class RobotAirSimEnv(RobotSimEnv, WorldState):
 
     def camera_depth(self, camera_index):
         """
-        Returns the front camera image.
+        Returns the front camera image depth.
         """
         return self.airsim_depth_image_to_numpy(
             self.sim_handler.client_camera_depth(camera_index))
