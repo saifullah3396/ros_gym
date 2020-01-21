@@ -88,12 +88,42 @@ class RobotAirSimEnv(RobotSimEnv, WorldState):
         img_rgba = np.flipud(img_rgba)
         return img_rgba
 
-    @property
-    def front_camera(self):
+    @staticmethod
+    def airsim_depth_image_to_numpy(airsim_img_response):
+        """
+        Converts airsim image to numpy image.
+
+        Parameters
+        ----------
+        airsim_img_response:  Airsim Image Type
+
+        Returns
+        -------
+        img_rgba: np.array
+            An RGB-D image as numpy array
+        """
+        img1d = \
+            np.fromstring(
+                airsim_img_response.image_data_uint8, dtype=np.uint8)
+        img_rgba = \
+            img1d.reshape(
+                airsim_img_response.height, airsim_img_response.width, 4)
+        img_rgba = np.flipud(img_rgba)
+        return img_rgba
+
+    def camera(self, camera_index):
         """
         Returns the front camera image.
         """
-        return self.airsim_image_to_numpy(self.sim_handler.client_front_camera)
+        return self.airsim_image_to_numpy(
+            self.sim_handler.client_camera(camera_index))
+
+    def camera_depth(self, camera_index):
+        """
+        Returns the front camera image.
+        """
+        return self.airsim_depth_image_to_numpy(
+            self.sim_handler.client_camera_depth(camera_index))
 
     @property
     def collision_check(self):
