@@ -6,6 +6,7 @@ Defines the UAVFollowTrajectoryTaskEnv class.
 from math import sqrt, acos, log
 import numpy as np
 import rospy
+from gym.spaces import Box, Dict
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from robot_envs import airsim_uav_robot_env, mavros_uav_robot_env
@@ -30,6 +31,42 @@ class UAVFollowTrajectoryTaskEnv(
 
         self.cumulated_reward = 0.0
         self.cumulated_steps = 0
+
+    def _setup_workspace(self):
+        """
+        Sets up the workspace of the environment.
+        """
+        # set up base workspace environment parameters
+        super(UAVFollowTrajectoryTaskEnv, self)._setup_workspace()
+
+        # front camera resolution
+        front_cam_h = rospy.get_param("/mavros_gym/front_cam_res/height")
+        front_cam_w = rospy.get_param("/mavros_gym/front_cam_res/width")
+        front_cam_obs_space = \
+            Box(
+                low=0,
+                high=255,
+                shape=(front_cam_h, front_cam_w, 4),
+                dtype=np.uint8)
+
+        # front camera depth resolution
+        front_cam_d_h = \
+            rospy.get_param("/mavros_gym/front_cam_d_res/height")
+        front_cam_d_w = \
+            rospy.get_param("/mavros_gym/front_cam_d_res/width")
+        front_cam_depth_obs_space = \
+            Box(
+                low=0,
+                high=255,
+                shape=(front_cam_d_h, front_cam_d_w, 4),
+                dtype=np.float32)
+
+        self.observation_space = \
+            Dict({
+                'position': self.pos_obs_space,
+                'velocity': self.vel_obs_space,
+                'front_cam': front_cam_obs_space,
+                'front_cam_depth': front_cam_depth_obs_space})
 
     def _pre_reset(self):
         """
