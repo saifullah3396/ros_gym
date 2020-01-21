@@ -18,10 +18,11 @@ class AirsimHandler(SimulationHandler):
     """
     # pylint: disable=broad-except
     def __init__(self):
-        super(AirsimHandler, self).__init__()
         self._new_state = True
         self._client = None
         self._multirotor_state = None
+
+        super(AirsimHandler, self).__init__()
 
     def setup(self):
         """
