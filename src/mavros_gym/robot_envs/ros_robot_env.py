@@ -87,8 +87,8 @@ class ROSRobotEnv(SIMULATION_ENV):
                 var = rospy.wait_for_message(name, srv_type, timeout)
             except ROSException:
                 rospy.logerr(
-                    '''Sensor topic {} is not available.
-                    Waiting...'''.format(name))
+                    'Sensor topic {} is not available. \
+                    Waiting...'.format(name))
         return var
 
     def _check_publisher_ready(self, name, obj, timeout=5.0):
@@ -99,8 +99,8 @@ class ROSRobotEnv(SIMULATION_ENV):
         while obj.get_num_connections() == 0 and not rospy.is_shutdown():
             if (rospy.Time.now() - start_time).to_sec() >= timeout:
                 rospy.logerr(
-                    '''No subscriber found for the publisher {}.
-                    Exiting...'''.format(name))
+                    'No subscriber found for the publisher {}. \
+                    Exiting...'.format(name))
 
     def _check_service_ready(self, name, timeout=5.0):
         """

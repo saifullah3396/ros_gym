@@ -63,8 +63,8 @@ class GazeboHandler(SimulationHandler):
             self.services['reset']()
         except rospy.ServiceException as exc:
             rospy.logerr(
-                '''Failed to call reset service with the following error:
-                {}.'''.format(exc))
+                'Failed to call reset service with the following error: \
+                {}.'.format(exc))
 
     def pause(self):
         """
@@ -73,8 +73,8 @@ class GazeboHandler(SimulationHandler):
         try:
             self.services['pause']()
         except rospy.ServiceException as exc:
-            rospy.logerr('''Failed to call pause service with the following
-            error: {}.'''.format(exc))
+            rospy.logerr('Failed to call pause service with the following \
+            error: {}.'.format(exc))
 
     def unpause(self):
         """
@@ -83,8 +83,8 @@ class GazeboHandler(SimulationHandler):
         try:
             self.services['unpause']()
         except rospy.ServiceException as exc:
-            rospy.logerr('''Failed to call unpause service with the following
-            error: {}.'''.format(exc))
+            rospy.logerr('Failed to call unpause service with the following \
+            error: {}.'.format(exc))
 
     def initialize_physics_params(
             self,
@@ -104,8 +104,8 @@ class GazeboHandler(SimulationHandler):
         try:
             self.services['set_physics'](set_physics_request)
         except rospy.ServiceException as exc:
-            rospy.logerr('''Failed to call set_physics service with following
-            error: {}.'''.format(exc))
+            rospy.logerr('Failed to call set_physics service with following \
+            error: {}.'.format(exc))
 
     def _check_service_ready(self, name, timeout=5.0):
         """
@@ -115,5 +115,5 @@ class GazeboHandler(SimulationHandler):
             rospy.wait_for_service(name, timeout)
         except (rospy.ServiceException, rospy.ROSException) as exc:
             rospy.logerr(
-                '''Service {} unavailable due to following
-                error: {}'''.format(name, exc))
+                'Service {} unavailable due to following \
+                error: {}'.format(name, exc))
