@@ -2,7 +2,7 @@
 """ Initializes the mavros_gym ros node for training. """
 
 import rospy
-from .mavros_gym import MavrosGym
+from mavros_gym import MavrosGym
 
 
 if __name__ == '__main__':
