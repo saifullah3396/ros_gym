@@ -178,9 +178,12 @@ class WorldState():
     def __init__(self):
         pass
 
-    @property
-    def front_camera(self):
-        """ Returns the front camera image. """
+    def camera(self, camera_index):
+        """ Should return the camera image at camera_index. """
+        raise NotImplementedError()
+
+    def camera_depth(self, camera_index):
+        """ Should return the camera image with depth at camera_index. """
         raise NotImplementedError()
 
     @property
