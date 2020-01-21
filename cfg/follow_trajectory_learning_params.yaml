@@ -1,8 +1,9 @@
 mavros_gym:
   sim_env: 'airsim'
+  use_mavros: False
   px4-est: 'ekf2'
-  use_pose_estimator: True
-  environment_name: 'uav-follow-trajectory-env-v0'
+  use_pose_estimator: False
+  environment_name: 'uav_follow_trajectory_task_env_v0'
   running_step: 0.04 # amount of time the control will be executed
   pos_step: 0.016     # increment in position for each command
   
@@ -22,12 +23,12 @@ mavros_gym:
   lz_vel_range: 6
   rot_vel_range: 6
 
-  linear_forward_speed: 0.5 # Spwwed for ging fowards
-  angular_turn_speed: 0.05 # Lienare speed when turning
+  linear_forward_speed: 0.5 # Speed for going foward
+  angular_turn_speed: 0.05 # Linear speed when turning
   angular_speed: 0.3 # Angular speed when turning Left or Right
 
   init_speed_vector:
-    linear_x: 0.0
+    linear_x: 0.0 
     linear_y: 0.0
     linear_z: 0.0
     angular_x: 0.0
@@ -35,36 +36,49 @@ mavros_gym:
     angular_z: 0.0
   
   work_space: # 3D cube in which Drone is allowed to move
-    x_max: 13.0
-    x_min: -1.0
-    y_max: 5.0
-    y_min: -1.0
-    z_max: 3.0
-    z_min: -1.0
+    x_max: 100.0
+    x_min: -100.0
+    y_max: 100.0
+    y_min: -100.0
+    z_max: 100.0
+    z_min: -100.0
 
   max_orientation_w: 99999999
   max_orientation_x: 99999999
   max_orientation_y: 99999999
   max_orientation_z: 99999999
 
+  max_velocity_vector:
+      linear_x: 30.0
+      linear_y: 30.0
+      linear_z: 30.0
+      angular_x: 30.0
+      angular_y: 30.0
+      angular_z: 30.0
+
+  front_cam_res:
+      width: 320 # same as in Documents/AirSim/settings.json
+      height: 240 # same as in Documents/AirSim/settings.json
+
   max_roll: 1.57 # Max roll after which we end the episode
   max_pitch: 1.57 # Max roll after which we end the episode
   max_yaw: inf # Max yaw, its 4 because its bigger the pi, its a complete turn actually the maximum
 
   desired_position:
-    x: 10.0
-    y: 5.0
-    z: 9.0
-  desired_orientation:
-    w: 1.0
     x: 0.0
+    y: -48.0
+    z: -3.0
+  desired_orientation:
+    w: -0.707
+    x: 0.707
     y: 0.0
     z: 0.0
 
+  min_height: 0.3
   desired_point_epsilon: 0.05 # Error acceptable to consider that it has reached the desired point
 
   closer_to_point_reward: 10 # We give points for getting closer to the desired point
   not_ending_point_reward: 1 # Points given if we just dont crash
   end_episode_points: 200 # Points given when ending an episode
-
+  collision_penalty: -1000
 

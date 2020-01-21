@@ -3,3 +3,5 @@ training_results/*
 mavros_gym.code-workspace
 .vscode/c_cpp_properties.json
 .vscode/settings.json
+src/.vscode/settings.json
+src/.vscode/c_cpp_properties.json

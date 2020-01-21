@@ -1,6 +1,16 @@
 <launch>
     <arg name="gui" default="true"/>
     <arg name="args" default=""/>
+    <arg name="agent" default="ddpg"/>
+
     <rosparam command="load" file="$(find mavros_gym)/cfg/follow_trajectory_learning_params.yaml" />
-    <node pkg="mavros_gym" name="mavros_gym_node" type="mavros_gym_node.py" output="screen"/>
+
+    <!-- launch rl_agent files -->
+    <include file="$(find rl_agents)/launch/agent.launch">
+        <arg name="agent" value="$(arg agent)"/>
+    </include>
+
+    <node pkg="mavros_gym" name="mavros_gym_node" type="mavros_gym_node.py" output="screen">
+    	<param name="agent" value="$(arg agent)"/>
+    </node>
 </launch>
