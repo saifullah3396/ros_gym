@@ -128,22 +128,48 @@ class AirsimHandler(SimulationHandler):
     @property
     def client_state(self):
         """
-        Returns the state of the robot from client
+        Returns the state of the robot from client.
         """
         if self._new_state:
             self._multirotor_state = self._client.getMultirotorState()
             self._new_state = False
         return self._multirotor_state
 
-    @property
-    def client_front_camera(self):
+    def client_camera(self, camera_index):
         """
-        Returns the front camera image from the client
+        Returns the image of the given camera from the client.
+
+        Parameters
+        ----------
+        camera_index: int
+            Camera index
         """
         responses = \
             self._client.simGetImages([
                 airsim.ImageRequest(
-                    "0", airsim.ImageType.Scene, False, False)
+                    camera_index,
+                    airsim.ImageType.Scene,
+                    False,
+                    False)
+                ])
+        return responses[0]
+
+    def client_camera_depth(self, camera_index):
+        """
+        Returns the image with depth of the given camera from the client.
+
+        Parameters
+        ----------
+        camera_index: int
+            Camera index
+        """
+        responses = \
+            self._client.simGetImages([
+                airsim.ImageRequest(
+                    camera_index,
+                    airsim.ImageType.DepthPerspective,
+                    False,
+                    False)
                 ])
         return responses[0]
 
