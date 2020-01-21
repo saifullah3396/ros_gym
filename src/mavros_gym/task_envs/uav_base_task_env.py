@@ -68,28 +68,24 @@ class UAVBaseTaskEnv():
         self.max_vel_ang_z = \
             rospy.get_param("/mavros_gym/max_velocity_vector/angular_z")
 
-        # front camera resolution
-        self.front_cam_h = rospy.get_param("/mavros_gym/front_cam_res/height")
-        self.front_cam_w = rospy.get_param("/mavros_gym/front_cam_res/width")
-
         pos_obs_low = \
             np.array([
                 self.work_space_x_max,
                 self.work_space_y_max,
                 self.work_space_z_max,
-                -self.max_qw,
-                -self.max_qx,
-                -self.max_qy,
-                -self.max_qz])
+                -1.0 * self.max_qw,
+                -1.0 * self.max_qx,
+                -1.0 * self.max_qy,
+                -1.0 * self.max_qz])
 
         vel_obs_low = \
             np.array([
-                -self.max_vel_lin_x,
-                -self.max_vel_lin_y,
-                -self.max_vel_lin_z,
-                -self.max_vel_ang_x,
-                -self.max_vel_ang_y,
-                -self.max_vel_ang_z])
+                -1.0 * self.max_vel_lin_x,
+                -1.0 * self.max_vel_lin_y,
+                -1.0 * self.max_vel_lin_z,
+                -1.0 * self.max_vel_ang_x,
+                -1.0 * self.max_vel_ang_y,
+                -1.0 * self.max_vel_ang_z])
 
         pos_obs_high = \
             np.array([
@@ -115,24 +111,17 @@ class UAVBaseTaskEnv():
                 pos_obs_low,
                 pos_obs_high,
                 dtype=np.float32)
+
         self.vel_obs_space = \
             Box(
                 vel_obs_low,
                 vel_obs_high,
                 dtype=np.float32)
 
-        self.front_cam_obs_space = \
-            Box(
-                low=0,
-                high=255,
-                shape=(self.front_cam_h, self.front_cam_w, 4),
-                dtype=np.uint8)
-
         self.observation_space = \
             Dict({
                 'position': self.pos_obs_space,
-                'velocity': self.vel_obs_space,
-                'front_cam': self.front_cam_obs_space})
+                'velocity': self.vel_obs_space})
 
     def _setup_action_space(self):
         """
