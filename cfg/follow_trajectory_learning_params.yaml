@@ -60,6 +60,10 @@ mavros_gym:
       width: 320 # same as in Documents/AirSim/settings.json
       height: 240 # same as in Documents/AirSim/settings.json
 
+  front_cam_d_res:
+      width: 320 # same as in Documents/AirSim/settings.json
+      height: 240 # same as in Documents/AirSim/settings.json
+
   max_roll: 1.57 # Max roll after which we end the episode
   max_pitch: 1.57 # Max roll after which we end the episode
   max_yaw: inf # Max yaw, its 4 because its bigger the pi, its a complete turn actually the maximum
