@@ -14,17 +14,3 @@ class RobotGazeboEnv(RobotSimEnv, WorldState):
     def __init__(self, robot_name_space, update_physics_params_at_start=True):
         super(RobotGazeboEnv, self).__init__(
             robot_name_space, GazeboHandler(update_physics_params_at_start))
-
-    @property
-    def front_camera(self):
-        """
-        Derived from WorldState
-        """
-        raise NotImplementedError()
-
-    @property
-    def collision_check(self):
-        """
-        Derived from WorldState
-        """
-        raise NotImplementedError()
