@@ -167,14 +167,14 @@ class UAVFollowTrajectoryTaskEnv(
 
         if not self.is_inside_workspace(current_position):
             rospy.loginfo(
-                'Episode finished since the robot has gone outside \
-                the workspace.')
+                'Episode finished since the robot has gone outside '
+                'the workspace.')
             return True
 
         if self.too_close_to_ground(-1*current_position[2]):
             rospy.loginfo(
-                'Episode finished since the robot has gone too close to \
-                the ground.')
+                'Episode finished since the robot has gone too close to '
+                'the ground.')
             return True
 
         if self.drone_has_flipped(current_orientation):
@@ -184,8 +184,8 @@ class UAVFollowTrajectoryTaskEnv(
 
         if self.is_in_desired_pose(current_pose, self.desired_pose_epsilon):
             rospy.loginfo(
-                'Episode finished since the robot has successfully reached \
-                its destination.')
+                'Episode finished since the robot has successfully reached '
+                'its destination.')
             return True
 
         return episode_done
@@ -222,13 +222,13 @@ class UAVFollowTrajectoryTaskEnv(
             # location, we reward it
             if distance_difference < 0.0:
                 rospy.loginfo(
-                    'Robot rewarded for getting close to the desired \
-                    destination.')
+                    'Robot rewarded for getting close to the desired '
+                    'destination.')
                 reward = self.closer_to_point_reward
             else:
                 rospy.loginfo(
-                    'Robot unrewarded for getting away from the desired  \
-                    destination.')
+                    'Robot unrewarded for getting away from the desired '
+                    'destination.')
                 reward = 0
         else:
             if self.collision_check:
