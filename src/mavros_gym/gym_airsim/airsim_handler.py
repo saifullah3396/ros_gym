@@ -91,7 +91,8 @@ class AirsimHandler(SimulationHandler):
         takeoff_z: Float
             Height to reach on takeoff
         """
-        return self._client.moveToZAsync(z=takeoff_z, velocity=0.1).join()
+        # airsim uses NED frame but we use xyz frame so invert z
+        return self._client.moveToZAsync(z=-takeoff_z, velocity=0.5).join()
 
     def client_land(self):
         """
@@ -157,7 +158,7 @@ class AirsimHandler(SimulationHandler):
 
     def client_camera_depth(self, camera_index):
         """
-        Returns the image with depth of the given camera from the client.
+        Returns the depth of the image from a given camera.
 
         Parameters
         ----------
@@ -168,8 +169,8 @@ class AirsimHandler(SimulationHandler):
             self._client.simGetImages([
                 airsim.ImageRequest(
                     camera_index,
-                    airsim.ImageType.DepthPerspective,
-                    False,
+                    airsim.ImageType.DepthPlanner,
+                    True,
                     False)
                 ])
         return responses[0]
