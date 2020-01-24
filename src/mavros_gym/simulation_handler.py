@@ -40,3 +40,9 @@ class SimulationHandler(object):
         """
         Might be implemented to update physics parameters at startup
         """
+
+    def check_connection(self):
+        """
+        Checkts whether the handler is connected to simulation and everything
+        is working fine
+        """

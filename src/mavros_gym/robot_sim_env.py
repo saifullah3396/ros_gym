@@ -50,6 +50,7 @@ class RobotSimEnv(gym.Env):
         info: Any additional info about the training step.
         """
 
+        self.sim_handler.check_connection()
         self.sim_handler.unpause()
         self._set_action(action)
         self.sim_handler.pause()
@@ -72,6 +73,7 @@ class RobotSimEnv(gym.Env):
             An array of observation data as obtained by _get_obs() function
             also defined at a lower level of hierarchy.
         """
+        rospy.loginfo('Resetting environment...')
         self._pre_reset()
         self.sim_handler.pause()
         self.sim_handler.reset()
