@@ -58,7 +58,7 @@ class UAVFollowTrajectoryTaskEnv(
             Box(
                 low=0,
                 high=255,
-                shape=(front_cam_d_h, front_cam_d_w, 4),
+                shape=(front_cam_d_h, front_cam_d_w),
                 dtype=np.float32)
 
         self.observation_space = \
@@ -140,6 +140,9 @@ class UAVFollowTrajectoryTaskEnv(
         action_vel.twist.angular.x = 0.0
         action_vel.twist.angular.y = 0.0
         action_vel.twist.angular.z = action[3]
+        rospy.loginfo(
+            "Setting action: [vx, vy, vz, yr] = [{}, {}, {}, {}]"
+            .format(action[0], action[1], action[2], action[3]))
 
         # set the desired velocity by publishing it to the robot
         self.pub_cmd_vel(action_vel)
@@ -266,7 +269,7 @@ class UAVFollowTrajectoryTaskEnv(
                 rospy.loginfo(
                     'Robot unrewarded for getting away from the desired '
                     'destination.')
-                reward = 0
+                reward = -10
         else:
             if self.collision_check:
                 reward = self.collision_penalty
