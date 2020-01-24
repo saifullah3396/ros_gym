@@ -6,5 +6,6 @@ new environment must be defined here as <filename>: <classname>
 
 
 TASK_ENV_MAP = {
-    'uav_follow_trajectory_task_env_v0': 'UAVFollowTrajectoryTaskEnv'
+    'uav_follow_trajectory_task_env_v0': 'UAVFollowTrajectoryTaskEnv',
+    'gym_cart_pole_task_env_v0': 'GymCartPoleTaskEnv'
 }
