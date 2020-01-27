@@ -5,8 +5,7 @@
 
     <rosparam
         command="load"
-        file="$(find mavros_gym)/cfg/uav_follow_trajectory_task_env.yaml"
-    />
+        file="$(find mavros_gym)/cfg/gym_cart_pole_task_env.yaml" />
 
     <!-- launch rl_agent files -->
     <include file="$(find rl_agents)/launch/agent.launch">
@@ -18,6 +17,6 @@
         name="mavros_gym_node"
         type="mavros_gym_node.py"
         output="screen">
-        <param name="agent" value="$(arg agent)"/>
+            <param name="agent" value="$(arg agent)"/>
     </node>
 </launch>
