@@ -29,5 +29,5 @@ class GymCartPoleTaskEnv(CartPoleEnv):
         return {"robot_state": state}, reward, done, {}
 
     def reset(self):
-        state = super(GymCartPoleTaskEnv, self).reset(action)
+        state = super(GymCartPoleTaskEnv, self).reset()
         return {"robot_state": state}
