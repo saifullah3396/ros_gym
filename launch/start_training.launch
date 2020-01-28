@@ -1,0 +1,23 @@
+<launch>
+    <arg name="env" default="uav_follow_trajectory_task_env"/>
+    <arg name="agent" default="ddpg"/>
+    <arg name="model" default="actor_critic_1"/>
+
+    <rosparam
+        command="load"
+        file="$(find mavros_gym)/cfg/$(arg env).yaml" />
+
+    <!-- launch rl_agent files -->
+    <include file="$(find rl_agents)/launch/agent.launch">
+        <arg name="agent" value="$(arg agent)"/>
+        <arg name="model" value="$(arg model)"/>
+    </include>
+
+    <node
+        pkg="mavros_gym"
+        name="mavros_gym_node"
+        type="mavros_gym_node.py"
+        output="screen">
+            <param name="agent" value="$(arg agent)"/>
+    </node>
+</launch>
