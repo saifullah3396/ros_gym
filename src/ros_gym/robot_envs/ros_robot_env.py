@@ -8,7 +8,7 @@ from rospy import ROSException
 from gym_gazebo import robot_gazebo_env
 from gym_airsim import robot_airsim_env
 
-SIM_ENV = rospy.get_param("/mavros_gym/sim_env")
+SIM_ENV = rospy.get_param("/ros_gym/sim_env")
 if SIM_ENV == 'gazebo':
     SIMULATION_ENV = robot_gazebo_env.RobotGazeboEnv
 elif SIM_ENV == 'airsim':

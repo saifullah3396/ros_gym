@@ -2,7 +2,7 @@
     <arg name="agent" default="ddpg"/>
     <arg name="model" default="actor_critic_2"/>
 
-    <include file="$(find mavros_gym)/launch/start_training.launch">
+    <include file="$(find ros_gym)/launch/start_training.launch">
         <arg name="env" value="gym_mc_continuous_task_env"/>
         <arg name="agent" value="$(arg agent)"/>
         <arg name="model" value="$(arg model)"/>

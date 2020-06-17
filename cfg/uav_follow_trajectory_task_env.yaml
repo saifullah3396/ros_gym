@@ -1,4 +1,4 @@
-mavros_gym:
+ros_gym:
   sim_env: 'airsim'
   use_mavros: False
   px4-est: 'ekf2'
@@ -6,7 +6,7 @@ mavros_gym:
   environment_name: 'uav_follow_trajectory_task_env_v0'
   running_step: 0.04 # amount of time the control will be executed
   pos_step: 0.016     # increment in position for each command
-  
+
   #qlearn parameters
   alpha: 0.1
   gamma: 0.7
@@ -28,13 +28,13 @@ mavros_gym:
   angular_speed: 0.3 # Angular speed when turning Left or Right
 
   init_speed_vector:
-    linear_x: 0.0 
+    linear_x: 0.0
     linear_y: 0.0
     linear_z: 0.0
     angular_x: 0.0
     angular_y: 0.0
     angular_z: 0.0
-  
+
   work_space: # 3D cube in which Drone is allowed to move
     x_max: 100.0
     x_min: -100.0

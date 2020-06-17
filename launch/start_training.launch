@@ -5,7 +5,7 @@
 
     <rosparam
         command="load"
-        file="$(find mavros_gym)/cfg/$(arg env).yaml" />
+        file="$(find ros_gym)/cfg/$(arg env).yaml" />
 
     <!-- launch rl_agent files -->
     <include file="$(find rl_agents)/launch/agent.launch">
@@ -14,9 +14,9 @@
     </include>
 
     <node
-        pkg="mavros_gym"
-        name="mavros_gym_node"
-        type="mavros_gym_node.py"
+        pkg="ros_gym"
+        name="ros_gym_node"
+        type="ros_gym_node.py"
         output="screen">
             <param name="agent" value="$(arg agent)"/>
     </node>

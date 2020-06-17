@@ -58,8 +58,8 @@ class MavrosGym:
 
     def setup(self):
         """ Gets the environment configuration and register it in gym """
-        env_name = rospy.get_param('mavros_gym/environment_name')
-        max_episode_steps = rospy.get_param('mavros_gym/max_episode_steps')
+        env_name = rospy.get_param('ros_gym/environment_name')
+        max_episode_steps = rospy.get_param('ros_gym/max_episode_steps')
         self.task_env = self.register_env(env_name, max_episode_steps)
 
         self.agent = \
@@ -68,7 +68,7 @@ class MavrosGym:
 
         # Set the logging system
         rospack = rospkg.RosPack()
-        pkg_path = rospack.get_path('mavros_gym')
+        pkg_path = rospack.get_path('ros_gym')
         outdir = pkg_path + '/training_results'
         self.task_env = wrappers.Monitor(self.task_env, outdir, force=True)
 

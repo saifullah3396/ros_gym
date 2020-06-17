@@ -5,7 +5,7 @@ Defines the RobotSimEnv class.
 
 import rospy
 import gym
-from mavros_gym_msgs.msg import RLExperimentInfo
+from ros_gym_msgs.msg import RLExperimentInfo
 
 
 class RobotSimEnv(gym.Env):

@@ -28,7 +28,7 @@ class MavrosUAVRobotEnv(ROSRobotEnv):
         super(MavrosUAVRobotEnv, self).__init__()
 
         # set px4 pose estimator name
-        est = rospy.get_param('mavros_gym/px4-est')
+        est = rospy.get_param('ros_gym/px4-est')
         if est == 'ekf2':
             self.pose_est_ = "px4-ekf2"
         elif est == 'lpe':

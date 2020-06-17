@@ -12,7 +12,7 @@ from geometry_msgs.msg import PoseStamped, TwistStamped
 from robot_envs import airsim_uav_robot_env, mavros_uav_robot_env
 from task_envs import uav_base_task_env
 
-USE_MAVROS = rospy.get_param("/mavros_gym/use_mavros")
+USE_MAVROS = rospy.get_param("/ros_gym/use_mavros")
 if USE_MAVROS:
     CONTROL_METHOD = mavros_uav_robot_env.MavrosUAVRobotEnv
 else:
@@ -40,8 +40,8 @@ class UAVFollowTrajectoryTaskEnv(
         super(UAVFollowTrajectoryTaskEnv, self)._setup_workspace()
 
         # front camera resolution
-        front_cam_h = rospy.get_param("/mavros_gym/front_cam_res/height")
-        front_cam_w = rospy.get_param("/mavros_gym/front_cam_res/width")
+        front_cam_h = rospy.get_param("/ros_gym/front_cam_res/height")
+        front_cam_w = rospy.get_param("/ros_gym/front_cam_res/width")
         front_cam_obs_space = \
             Box(
                 low=0,
@@ -51,9 +51,9 @@ class UAVFollowTrajectoryTaskEnv(
 
         # front camera depth resolution
         front_cam_d_h = \
-            rospy.get_param("/mavros_gym/front_cam_d_res/height")
+            rospy.get_param("/ros_gym/front_cam_d_res/height")
         front_cam_d_w = \
-            rospy.get_param("/mavros_gym/front_cam_d_res/width")
+            rospy.get_param("/ros_gym/front_cam_d_res/width")
         front_cam_depth_obs_space = \
             Box(
                 low=0,
@@ -352,8 +352,8 @@ class UAVFollowTrajectoryTaskEnv(
                 current_orientation[2],
                 current_orientation[3],
                 current_orientation[0]])
-        self.max_roll = rospy.get_param("/mavros_gym/max_roll")
-        self.max_pitch = rospy.get_param("/mavros_gym/max_pitch")
+        self.max_roll = rospy.get_param("/ros_gym/max_roll")
+        self.max_pitch = rospy.get_param("/ros_gym/max_pitch")
 
         return not all(
             [
