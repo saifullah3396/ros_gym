@@ -1,0 +1,4 @@
+mavros_gym:
+  environment_name: 'gym_mc_continuous_task_env_v0'
+  max_episode_steps: 1000
+
