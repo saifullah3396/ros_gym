@@ -41,6 +41,16 @@ class AirsimHandler(SimulationHandler):
         self._client.armDisarm(False)
         super(AirsimHandler, self).setup()
 
+    def check_connection(self):
+        """
+        Checkts whether the handler is connected to simulation and everything
+        is working fine
+        """
+        # if api control got disabled by some error then enable it
+        if not self._client.isApiControlEnabled():
+            rospy.loginfo('Re-enabling api control.')
+            self._client.enableApiControl(True)
+
     def reset(self):
         """
         Resets the simulation world
@@ -120,13 +130,14 @@ class AirsimHandler(SimulationHandler):
         -------
         @todo @Hassaan: What is the return?
         """
-        lin_vel_ind = \
-            self._client.moveByVelocityAsync(
-                vel_x, vel_y, vel_z, duration=0.005).join()
-        yaw_rate_ind = \
-            self._client.rotateByYawRateAsync(
-                yaw_rate, duration=0.005).join()
-        return lin_vel_ind and yaw_rate_ind
+        '''rospy.loginfo(
+            'Sending actions vx={}, vy={}, vz={}, yaw_rate={} to robot'.format(
+                vel_x, vel_y, vel_z, yaw_rate))'''
+        yaw_cmd = airsim.YawMode()
+        yaw_cmd.is_rate = True
+        yaw_cmd.yaw_or_rate = yaw_rate
+        self._client.moveByVelocityAsync(
+            vel_x, vel_y, vel_z, yaw_mode=yaw_cmd, duration=0.005).join()
 
     @property
     def client_state(self):

@@ -1,0 +1,4 @@
+mavros_gym:
+  environment_name: 'gym_cart_pole_task_env_v0'
+  max_episode_steps: 1000
+
