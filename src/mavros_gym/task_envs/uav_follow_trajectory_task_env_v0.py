@@ -58,7 +58,7 @@ class UAVFollowTrajectoryTaskEnv(
             Box(
                 low=0,
                 high=255,
-                shape=(front_cam_d_h, front_cam_d_w),
+                shape=(front_cam_d_h, front_cam_d_w, 4),
                 dtype=np.float32)
 
         self.observation_space = \
