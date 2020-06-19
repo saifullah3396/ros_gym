@@ -9,7 +9,6 @@ import gym
 from gym import wrappers
 from gym import register
 from gym import envs
-from rl_agents.common.agent_base import AgentBase
 from task_envs.task_env_map import TASK_ENV_MAP
 
 
@@ -19,7 +18,6 @@ class MavrosGym:
     their training process.
     """
     def __init__(self):
-        self.agent = None
         self.task_env = None
 
     # pylint: disable=no-self-use
@@ -62,23 +60,17 @@ class MavrosGym:
         max_episode_steps = rospy.get_param('ros_gym/max_episode_steps')
         self.task_env = self.register_env(env_name, max_episode_steps)
 
-        self.agent = \
-            AgentBase.get_agent(rospy.get_param('~agent'), env=self.task_env)
-        rospy.loginfo('Using agent of type: {}'.format(self.agent.name))
-
         # Set the logging system
         rospack = rospkg.RosPack()
         pkg_path = rospack.get_path('ros_gym')
         outdir = pkg_path + '/training_results'
         self.task_env = wrappers.Monitor(self.task_env, outdir, force=True)
 
-    def start_training(self):
+    def run(self):
         """
         Starts the training process by using the specified environment
         and agent
         """
         if self.task_env is None:
             rospy.logfatal("No task environment found for training.")
-        if self.agent is None:
-            rospy.logfatal("No agent found for training.")
-        self.agent.start_training()
+        rospy.spin()

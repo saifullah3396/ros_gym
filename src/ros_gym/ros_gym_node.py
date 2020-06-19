@@ -11,5 +11,4 @@ if __name__ == '__main__':
     # pylint: disable=invalid-name
     ros_gym_node = MavrosGym()
     ros_gym_node.setup()
-    ros_gym_node.start_training()
-    rospy.spin()
+    ros_gym_node.run()
