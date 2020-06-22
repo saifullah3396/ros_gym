@@ -10,3 +10,7 @@ TASK_ENV_MAP = {
     'gym_cart_pole_task_env_v0': 'GymCartPoleTaskEnv',
     'gym_mc_continuous_task_env_v0': 'GymMCContinuousTaskEnv'
 }
+
+TASK_ENV_ROS_MAP = {
+    'gym_cart_pole_task_env_v0': 'GymCartPoleRosWrapper',
+}
