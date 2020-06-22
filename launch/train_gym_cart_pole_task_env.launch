@@ -1,5 +1,7 @@
 <launch>
+    <arg name="agent" default="ddpg"/>
     <include file="$(find ros_gym)/launch/start_training.launch">
         <arg name="env" value="gym_cart_pole_task_env"/>
+        <arg name="agent" value="$(arg agent)"/>
     </include>
 </launch>

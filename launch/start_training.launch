@@ -1,5 +1,6 @@
 <launch>
     <arg name="env" default="uav_follow_trajectory_task_env"/>
+    <arg name="agent" default="ddpg"/>
 
     <rosparam
         command="load"
@@ -11,4 +12,7 @@
         type="ros_gym_node.py"
         output="screen">
     </node>
+
+    <include file="$(find rl_agents)/launch/$(arg agent).launch">
+    </include>
 </launch>
