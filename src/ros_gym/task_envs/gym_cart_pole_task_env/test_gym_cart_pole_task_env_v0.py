@@ -5,6 +5,6 @@ from gym_cart_pole_task_env_v0 import GymCartPoleTaskEnv
 
 
 rospy.init_node("gym_cart_pole_task_env")
-
 env = GymCartPoleTaskEnv()
+env.step_srv_cb('input')
 rospy.spin()
