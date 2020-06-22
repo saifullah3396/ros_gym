@@ -31,7 +31,11 @@ class MavrosGym:
 
         name = task_env.replace("_", "-")
         if TASK_ENV_MAP[task_env] is not None:
-            env_file = 'task_envs.' + task_env + ":" + TASK_ENV_MAP[task_env]
+            env_file = \
+                'task_envs.' + \
+                task_env[:-3] + '.' + task_env + ":" + \
+                TASK_ENV_MAP[task_env]
+
             register(
                 id=name,
                 entry_point=env_file,
@@ -42,7 +46,7 @@ class MavrosGym:
             # pylint: disable=exec-used
             exec(
                 'from task_envs.' +
-                task_env +
+                task_env[:-3] + '.' + task_env +
                 ' import ' +
                 TASK_ENV_MAP[task_env])
 
