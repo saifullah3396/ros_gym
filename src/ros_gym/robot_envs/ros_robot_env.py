@@ -77,14 +77,14 @@ class ROSRobotEnv(SIMULATION_ENV):
         """
         raise NotImplementedError()
 
-    def _check_subscriber_ready(self, name, srv_type, timeout=5.0):
+    def _check_subscriber_ready(self, name, sub_type, timeout=5.0):
         """
         Waits for a sensor topic to get ready for connection
         """
         var = None
         while var is None and not rospy.is_shutdown():
             try:
-                var = rospy.wait_for_message(name, srv_type, timeout)
+                var = rospy.wait_for_message(name, sub_type, timeout)
             except ROSException:
                 rospy.logerr(
                     'Sensor topic {} is not available. '.format(name) +
