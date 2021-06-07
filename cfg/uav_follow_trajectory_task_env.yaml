@@ -1,6 +1,6 @@
 mavros_gym:
   sim_env: 'airsim'
-  use_mavros: False
+  use_mavros: True
   px4-est: 'ekf2'
   use_pose_estimator: False
   environment_name: 'uav_follow_trajectory_task_env_v0'
